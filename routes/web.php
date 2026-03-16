@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Mcp\Enums\Role;
 use Illuminate\Http\Request;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/destroy/{id}', [userController::class, 'destroy'])->name('user.destroy');
     Route::post('/user/edit', [userController::class, 'edit'])->name('user.edit');
     Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 
@@ -53,6 +56,5 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::get('/dashboard', function () {
-        Route::get('/movimentacao/list/itens', [MovimentacaoController::class, 'list'])->name('movimentacao.list');
-})->name('dashboard');
+// ou, se preferir outra URL:
+// Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

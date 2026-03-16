@@ -41,7 +41,7 @@
 
                     {{-- Senha --}}
                     <div>
-                        <x-input-label for="password" :value="__('Password')" />
+                        <x-input-label for="password" :value="__('Senha')" />
                         <x-text-input id="password" class="block mt-1 w-full" type="password" name="password"
                                       required autocomplete="current-password" />
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -71,6 +71,9 @@
                     </div>
                 </form>
 
+                <a href="{{ route('register') }}" class="mt-6 text-center text-sm text-blue-600 hover:underline">
+                    Não tem conta? Crie uma nova
+                </a>
                 {{-- Pequeno rodapé no card --}}
                 <div class="mt-6 text-xs text-gray-500">
                     <span>Versão do sistema: <strong class="text-gray-700">1.0.0</strong></span>

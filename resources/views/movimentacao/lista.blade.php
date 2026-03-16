@@ -4,7 +4,7 @@
 @section('title', 'Movimentações')
 @section('page_header', 'Movimentações')
 @section('page_actions')
-    <a href="{{ route('movimentacao.store') }}"
+    <a href="{{ route('movimentacao.index') }}"
         class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm">
         Nova Movimentação
     </a>
@@ -187,21 +187,6 @@
                             class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
                     </label>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label class="block">
-                        <span class="text-sm text-gray-700">Hora Fim</span>
-                        <input type="time" name="hora_fim" id="edit_hora_fim"
-                            class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
-                    </label>
-                    <label class="block">
-                        <span class="text-sm text-gray-700">Data Fim</span>
-                        <input type="date" name="data_fim" id="edit_data_fim"
-                            class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
-                    </label>
-                </div>
-
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label class="block">
                         <span class="text-sm text-gray-700">Veículo</span>
@@ -391,8 +376,6 @@
             const fOrigem = document.getElementById('edit_origem');
             const fDestino = document.getElementById('edit_destino');
             const fObs = document.getElementById('edit_observacoes');
-            const fDataFim = document.getElementById('edit_data_fim');
-            const fHoraFim = document.getElementById('edit_hora_fim');
 
             // recalcula km rodado
             function recalcEditKm() {
@@ -445,8 +428,6 @@
                     if (fOrigem) fOrigem.value = this.getAttribute('data-origem') || '';
                     if (fDestino) fDestino.value = this.getAttribute('data-destino') || '';
                     if (fObs) fObs.value = this.getAttribute('data-observacoes') || '';
-                    if (fDataFim) fDataFim.value = this.getAttribute('data-data_fim') || '';
-                    if (fHoraFim) fHoraFim.value = this.getAttribute('data-hora_fim') || '';
                     
 
                     // set form action

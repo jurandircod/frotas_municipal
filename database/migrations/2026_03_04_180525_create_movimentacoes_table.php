@@ -17,9 +17,9 @@ class CreateMovimentacoesTable extends Migration
             $table->unsignedBigInteger('veiculo_id');
             $table->unsignedBigInteger('user_id');
             $table->string('tipo_combustivel', 30)->nullable();
-            $table->decimal('km_inicial', 10, 1)->nullable();
-            $table->decimal('km_final', 10, 1)->nullable();
-            $table->decimal('km_rodado', 10, 1)->nullable(); // pode ser calculado na aplicação também
+            $table->decimal('km_inicial', 10)->nullable();
+            $table->decimal('km_final', 10)->nullable();
+            $table->decimal('km_rodado', 10)->nullable(); // pode ser calculado na aplicação também
             $table->string('origem')->nullable();
             $table->string('destino')->nullable();
             $table->text('observacao')->nullable();

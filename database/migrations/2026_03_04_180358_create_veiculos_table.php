@@ -17,7 +17,7 @@ class CreateVeiculosTable extends Migration
             $table->string('cor', 50)->nullable();
             $table->unsignedBigInteger('tipo_veiculo_id')->nullable();
             $table->string('combustivel', 30)->nullable(); // gasolina, etanol, diesel, flex, eletrico...
-            $table->decimal('km_atual', 10, 1)->default(0);
+            $table->decimal('km_atual', 10)->default(0);
             $table->string('status', 30)->default('ativo'); // ativo, manutencao, inativo...
             $table->timestamps();
 
