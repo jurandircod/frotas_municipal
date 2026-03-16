@@ -37,8 +37,8 @@
                     <table class="w-full text-sm" id="movTable">
                         <thead class="text-xs text-gray-500 text-left">
                             <tr>
-                                <th class="px-3 py-2">Data / Hora</th>
-                                <th class="px-3 py-2">Motorista</th>
+                                <th class="px-3 py-2">Data / Hora Inicio</th>
+                                <th class="px-3 py-2">Data / Hora Fim</th>
                                 <th class="px-3 py-2">Veículo</th>
                                 <th class="px-3 py-2">Origem → Destino</th>
                                 <th class="px-3 py-2">KM Rodado</th>
@@ -50,6 +50,9 @@
                                 <tr class="border-t">
                                     <td class="px-3 py-3 text-gray-800">
                                         {{ \Carbon\Carbon::parse($m->data)->format('d/m/Y') }} {{ substr($m->hora ?? '', 0, 5) }}
+                                    </td>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($m->data_fim)->format('d/m/Y') }} {{ substr($m->hora_fim ?? '', 0, 5) }}
                                     </td>
                                     <td class="px-3 py-3">{{ $m->user->name ?? ($m->motorista_nome ?? '-') }}</td>
                                     <td class="px-3 py-3">{{ $m->veiculo_placa ?? ($m->veiculo->placa ?? '-') }}
@@ -68,6 +71,8 @@
                                                 data-id="{{ $m->id }}"
                                                 data-data="{{ optional($m->data)->format('Y-m-d') ?? '' }}"
                                                 data-hora="{{ $m->hora ?? '' }}"
+                                                data-data_fim="{{ optional($m->data_fim)->format('Y-m-d') ?? '' }}"
+                                                data-hora_fim="{{ $m->hora_fim ?? '' }}"
                                                 data-veiculo="{{ $m->veiculo_id ?? ($m->veiculo->id ?? '') }}"
                                                 data-motorista="{{ $m->user->id ?? ($m->user->id ?? '') }}"
                                                 data-tipo="{{ $m->tipo_combustivel ?? '' }}"
@@ -182,6 +187,20 @@
                             class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
                     </label>
                 </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="block">
+                        <span class="text-sm text-gray-700">Hora Fim</span>
+                        <input type="time" name="hora_fim" id="edit_hora_fim"
+                            class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm text-gray-700">Data Fim</span>
+                        <input type="date" name="data_fim" id="edit_data_fim"
+                            class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
+                    </label>
+                </div>
+
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label class="block">
@@ -372,6 +391,8 @@
             const fOrigem = document.getElementById('edit_origem');
             const fDestino = document.getElementById('edit_destino');
             const fObs = document.getElementById('edit_observacoes');
+            const fDataFim = document.getElementById('edit_data_fim');
+            const fHoraFim = document.getElementById('edit_hora_fim');
 
             // recalcula km rodado
             function recalcEditKm() {
@@ -424,6 +445,9 @@
                     if (fOrigem) fOrigem.value = this.getAttribute('data-origem') || '';
                     if (fDestino) fDestino.value = this.getAttribute('data-destino') || '';
                     if (fObs) fObs.value = this.getAttribute('data-observacoes') || '';
+                    if (fDataFim) fDataFim.value = this.getAttribute('data-data_fim') || '';
+                    if (fHoraFim) fHoraFim.value = this.getAttribute('data-hora_fim') || '';
+                    
 
                     // set form action
                     if (form) form.action = updateRoute;

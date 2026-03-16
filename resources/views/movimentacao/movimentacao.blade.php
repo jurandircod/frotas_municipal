@@ -2,10 +2,11 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-xl mx-auto">
+        <div class="max-w-xl mx-auto pb-24"> <!-- pb-24 para evitar conteúdo escondido pelo footer móvel -->
             <div class="bg-white rounded-2xl shadow-md overflow-hidden">
                 <div class="px-6 py-5 border-b">
-                    <h1 class="text-lg sm:text-2xl font-semibold text-gray-800">Motorista - <span class="text-blue-600">{{ Auth::user()->name }}</span></h1>
+                    <h1 class="text-lg sm:text-2xl font-semibold text-gray-800">Motorista - <span
+                            class="text-blue-600">{{ Auth::user()->name }}</span></h1>
                     <p class="text-sm text-gray-500 mt-1">Diário de bordo — preencha os dados da saída</p>
                 </div>
 
@@ -18,15 +19,27 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" hidden>
                         <label class="block">
                             <span class="text-sm font-medium text-gray-700" hidden>Data</span>
-                            <input name="data" id="data" type="date" value="{{ old('data', date('Y-m-d')) }}"
-                                class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                required aria-required="true" hidden>
+                            @if ($movimentacao->isEmpty())
+                                <input name="data" id="data" type="date" value="{{ old('data', date('Y-m-d')) }}"
+                                    class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    required aria-required="true" hidden>
+                            @else
+                                <input name="data_fim" id="data" type="date" value="{{ old('data_fim', date('Y-m-d')) }}"
+                                    class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    required aria-required="true" hidden>
+                            @endif
                         </label>
                         <label class="block">
                             <span class="text-sm font-medium text-gray-700" hidden>Hora</span>
-                            <input name="hora" id="hora" type="time" value="{{ old('hora', date('H:i')) }}"
-                                class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                required aria-required="true" hidden>
+                            @if ($movimentacao->isEmpty())
+                                <input name="hora" id="hora" type="time" value="{{ old('hora', date('H:i')) }}"
+                                    class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    required aria-required="true" hidden>
+                            @else
+                                <input name="hora_fim" id="hora" type="time" value="{{ old('hora_fim', date('H:i')) }}"
+                                    class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    required aria-required="true" hidden>
+                            @endif
                         </label>
                     </div>
 
@@ -40,20 +53,18 @@
                         $badgeClasses = match ($currentStatus) {
                             'cancelada' => 'bg-red-100 text-red-800',
                             'finalizada' => 'bg-green-100 text-yellow-800',
-                            default => 'bg-yellow-100 text-green-800', // 'ativa' e fallback
+                            default => 'bg-red-100 text-green-800', // 'ativa' e fallback
                         };
 
                         $badgeLabel = match ($currentStatus) {
                             'cancelada' => 'Cancelada',
-                            'finalizada' => 'Em movimentação',
-                            default => 'Ativa',
+                            'finalizada' => 'Finalizar corrida',
+                            default => 'Iniciar corrida',
                         };
                     @endphp
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <label class="block col-span-1 sm:col-span-2">
-                            <span class="text-sm font-medium text-gray-700">Status</span>
-
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" hidden>
+                        <label class="block col-span-1 sm:col-span-2" hidden>
                             {{-- hidden para envio ao backend --}}
                             <input type="hidden" name="status" id="status" value="{{ $currentStatus }}">
 
@@ -75,7 +86,7 @@
                     </div>
 
                     <!-- row: veiculo + motorista -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" hidden>
                         <label class="block">
                             <span class="text-sm font-medium text-gray-700"
                                 @if (isset($veiculoId)) hidden @endif>Veículo</span>
@@ -189,7 +200,7 @@
                                 <span class="text-sm font-medium text-gray-700">KM Final</span>
                                 <input name="km_final" id="km_final" inputmode="decimal" pattern="^\d+(\.\d{1,2})?$"
                                     type="number" step="0.1"
-                                    value="{{ old('km_final') ?? $movimentacao->first()->km_final }}"
+                                    value="{{ old('km_final') ?? $movimentacao->first()->km_inicial }}"`
                                     class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                                     required aria-required="true">
                             @endif
@@ -200,7 +211,7 @@
                             @enderror
                         </label>
 
-                        <label class="">
+                        <label class="" hidden>
                             @if ($movimentacao->isEmpty())
                                 <input name="km_rodado" hidden id="km_rodado" type="number" value="0.0"
                                     class="mt-1 w-full rounded-lg border-gray-200 bg-gray-50 shadow-sm py-3 px-3" readonly
@@ -288,6 +299,22 @@
                         </div>
                     </div>
                 </form>
+
+                <!-- Mobile fixed buttons (visible only on small screens) -->
+                <div class="sm:hidden fixed inset-x-0 bottom-0 z-50 bg-white border-t p-3">
+                    <div class="max-w-xl mx-auto flex gap-3">
+                        <a href="@if($movimentacao->isEmpty()) {{ url()->previous() }} @else {{ route('movimentacao.cancelar', $movimentacao->first()->id) }} @endif"
+                            class="flex-1 text-center py-3 rounded-lg border border-gray-300 text-sm">
+                            @if($movimentacao->isEmpty()) Cancelar @else Cancelar @endif
+                        </a>
+
+                        <button type="button" onclick="document.getElementById('movForm').submit()"
+                            class="flex-1 py-3 rounded-lg bg-blue-600 text-white text-sm">
+                            @if($movimentacao->isEmpty()) Iniciar Corrida @else Concluir Corrida @endif
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -302,6 +329,36 @@
             const kmFinal = document.getElementById('km_final');
             const kmRodado = document.getElementById('km_rodado');
             const errorMsg = document.getElementById('errorMsg');
+            const form = document.getElementById('movForm');
+
+            // --- Marca permanentemente os inputs visíveis e editáveis com borda vermelha ---
+            (function markVisibleFieldsRed() {
+                if (!form) return;
+                const controls = form.querySelectorAll('input, select');
+                controls.forEach(el => {
+                    // ignora inputs hidden / com atributo hidden / type=hidden
+                    if (el.type === 'hidden' || el.hasAttribute('hidden')) return;
+                    // ignora elementos com display:none ou visibility:hidden
+                    const cs = window.getComputedStyle(el);
+                    if (cs.display === 'none' || cs.visibility === 'hidden') return;
+                    // ignora campos somente leitura ou desabilitados
+                    if (el.readOnly || el.disabled) return;
+
+                    // remove classes de borda cinza comuns para evitar conflito
+                    el.classList.remove('border-gray-300', 'border-gray-200', 'bg-gray-50');
+
+                    // adiciona classes Tailwind para borda vermelha (persistente)
+                    // e mantém classes de foco para consistência visual
+                    el.classList.add('border-2', 'border-red-600', 'focus:ring-red-400',
+                        'focus:border-red-600');
+
+                    // fallback inline para garantir que fique vermelho mesmo sem classes
+                    el.style.borderColor = '#dc2626'; // vermelho (red-600)
+                    el.style.borderWidth = '2px';
+                    // opcional: remover sombra que pode esconder a borda
+                    el.style.boxShadow = 'none';
+                });
+            })();
 
             if (!selVeiculo) return;
 
@@ -326,17 +383,14 @@
             (function applyInitialSelection() {
                 let initialOpt = null;
 
-                // 1) Se o select já tem um index selecionado válido, usa esse
                 if (selVeiculo.selectedIndex >= 0) {
                     initialOpt = selVeiculo.options[selVeiculo.selectedIndex];
                 }
 
-                // 2) Se não encontrou (ou para segurança), procura por option[selected] no DOM
                 if ((!initialOpt || initialOpt.value === '') && selVeiculo.querySelector('option[selected]')) {
                     initialOpt = selVeiculo.querySelector('option[selected]');
                 }
 
-                // 3) fallback: seleciona a primeira option que tenha data-km (útil se você acidentalmente deixou todas 'selected')
                 if ((!initialOpt || initialOpt.value === '')) {
                     const withDataKm = selVeiculo.querySelector('option[data-km]');
                     if (withDataKm && withDataKm.value !== '') initialOpt = withDataKm;
@@ -354,26 +408,26 @@
 
                 if (kmFinal.value === '' || isNaN(b)) {
                     kmRodado.value = '0.0';
-                    errorMsg && (errorMsg.textContent = '');
-                    kmFinal.removeAttribute('aria-invalid');
+                    if (errorMsg) errorMsg.textContent = '';
+                    kmFinal && kmFinal.removeAttribute('aria-invalid');
                     return;
                 }
 
                 if (isNaN(a)) {
                     kmRodado.value = '';
-                    errorMsg && (errorMsg.textContent = 'Informe um KM inicial válido.');
+                    if (errorMsg) errorMsg.textContent = 'Informe um KM inicial válido.';
                     return;
                 }
 
                 const diff = b - a;
                 if (diff < 0) {
                     kmRodado.value = '';
-                    errorMsg && (errorMsg.textContent = 'KM Final não pode ser menor que KM Inicial.');
-                    kmFinal.setAttribute('aria-invalid', 'true');
+                    if (errorMsg) errorMsg.textContent = 'KM Final não pode ser menor que KM Inicial.';
+                    kmFinal && kmFinal.setAttribute('aria-invalid', 'true');
                 } else {
                     kmRodado.value = diff.toFixed(1);
-                    errorMsg && (errorMsg.textContent = '');
-                    kmFinal.removeAttribute('aria-invalid');
+                    if (errorMsg) errorMsg.textContent = '';
+                    kmFinal && kmFinal.removeAttribute('aria-invalid');
                 }
             }
 
@@ -381,7 +435,7 @@
             if (kmInicialField) kmInicialField.addEventListener('input', recalcKmRodado);
             if (kmFinal) kmFinal.addEventListener('input', recalcKmRodado);
 
-            // se quiser garantir que o recálculo rode ao carregar (quando já houver valores preenchidos)
+            // recálculo ao carregar (quando já houver valores preenchidos)
             recalcKmRodado();
         });
     </script>

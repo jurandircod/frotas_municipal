@@ -12,6 +12,8 @@ class CreateMovimentacoesTable extends Migration
             $table->id();
             $table->date('data');
             $table->time('hora')->nullable();
+            $table->date('data_fim')->nullable();
+            $table->time('hora_fim')->nullable();
             $table->unsignedBigInteger('veiculo_id');
             $table->unsignedBigInteger('user_id');
             $table->string('tipo_combustivel', 30)->nullable();

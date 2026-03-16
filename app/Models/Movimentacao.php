@@ -24,6 +24,8 @@ class Movimentacao extends Model
         'destino',
         'observacao',
         'status',
+        'data_fim',
+        'hora_fim',
     ];
 
     protected $casts = [

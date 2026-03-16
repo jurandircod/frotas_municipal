@@ -10,6 +10,7 @@
     {{-- Tailwind CDN --}}
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link rel="shortcut icon" href="{{asset('logoprefeitura.png')}}">
 
     <style>
         /* safe area */
@@ -234,7 +235,7 @@
             // Notyf alerts
             const notyf = new Notyf({
                 duration: 4000,
-                position: { x: 'right', y: 'bottom' },
+                position: { x: 'right', y: 'top' },
                 dismissible: true,
                 types: [
                     { type: 'info', background: '#3b82f6', icon: false },
