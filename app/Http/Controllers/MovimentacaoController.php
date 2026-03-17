@@ -130,7 +130,7 @@ class MovimentacaoController extends Controller
             ], 200);
         }
 
-        return redirect()->back()->with('success', 'Movimentação editada com sucesso!');
+        return redirect()->route('dashboard.home')->with('success', 'Movimentação editada com sucesso!');
     }
 
     /**

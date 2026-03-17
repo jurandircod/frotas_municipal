@@ -19,7 +19,6 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* header height */
         :root {
             --header-h: 56px;
         }
@@ -28,7 +27,6 @@
             height: var(--header-h);
         }
 
-        /* main offset to avoid header overlap + sidebar offset on md+ */
         main {
             padding-top: calc(var(--header-h) + 0.75rem);
         }
@@ -38,27 +36,13 @@
                 padding-top: calc(var(--header-h) + 1rem);
                 margin-left: 16rem;
             }
-
-            /* sidebar w-64 = 16rem */
         }
 
-        /* overlay transition helper */
-        .translate-x-0 {
-            transform: translateX(0);
-        }
+        .translate-x-0 { transform: translateX(0); }
+        .-translate-x-full { transform: translateX(-100%); }
 
-        .-translate-x-full {
-            transform: translateX(-100%);
-        }
-
-        /* subtle collapse chevron rotation */
-        .chev {
-            transition: transform .15s ease;
-        }
-
-        .chev-open {
-            transform: rotate(90deg);
-        }
+        .chev { transition: transform .15s ease; }
+        .chev-open { transform: rotate(90deg); }
     </style>
 
     @stack('styles')
@@ -81,33 +65,27 @@
                         <span class="sr-only">Abrir menu</span>
                     </button>
 
-                    {{-- Logo small in header (keeps header tight) --}}
                     <a href="{{ url('/') }}" class="flex items-center gap-2 ml-1">
                         <img src="{{ asset('images/logo-prefeitura.png') }}" alt="Logo"
                             onerror="this.style.display='none'"
                             class="h-8 w-8 rounded-md object-contain border bg-white p-1">
-                        <span
-                            class="hidden sm:inline-block text-sm font-semibold">{{ config('app.name', 'Prefeitura') }}</span>
+                        <span class="hidden sm:inline-block text-sm font-semibold">{{ config('app.name', 'Prefeitura') }}</span>
                     </a>
                 </div>
 
-                {{-- Centro (breadcrumb opcional) --}}
                 <div class="hidden md:flex md:flex-1 md:justify-center">
                     <div class="text-sm font-medium text-gray-700">@yield('page_header', '')</div>
                 </div>
 
-                {{-- Ações do usuário --}}
                 <div class="flex items-center gap-3">
                     <div class="relative">
                         <button id="userMenuBtn" aria-haspopup="true" aria-expanded="false"
                             class="flex items-center gap-2 p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
                             <span class="hidden md:inline-block text-sm text-gray-700">Olá, <strong
                                     class="font-medium">{{ Auth::user()->name ?? 'Usuário' }}</strong></span>
-                            <div
-                                class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                            <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
                                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path
-                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z" />
+                                    <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z" />
                                 </svg>
                             </div>
                         </button>
@@ -126,11 +104,10 @@
         </div>
     </header>
 
-    {{-- SIDEBAR (desktop fixed + mobile offcanvas) --}}
+    {{-- SIDEBAR --}}
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-100 shadow-md transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
         <div class="h-full flex flex-col">
-            {{-- Brand / logo --}}
             <div class="px-4 py-4 border-b border-gray-100">
                 <div class="flex items-center gap-3">
                     <img src="{{ asset('images/logo-prefeitura.png') }}" alt="Logo Prefeitura"
@@ -142,7 +119,6 @@
                     </div>
                 </div>
 
-                {{-- sidebar search --}}
                 <div class="mt-3">
                     <label for="sidebarSearch" class="sr-only">Pesquisar</label>
                     <div class="relative">
@@ -156,13 +132,18 @@
 
             {{-- Navigation grouped --}}
             <nav class="px-2 py-4 overflow-y-auto space-y-2 flex-1" aria-label="Sidebar">
+
+                @php
+                    // pega o usuário autenticado (garanta que auth está disponível)
+                    $user = auth()->user();
+                @endphp
+
                 {{-- Fleet group --}}
                 <div class="px-1">
                     <button type="button"
                         class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
                         data-toggle-group="fleet" aria-expanded="true">
                         <div class="flex items-center gap-3">
-                            <!-- icon -->
                             <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -180,15 +161,20 @@
                     </button>
 
                     <div class="mt-1 space-y-1 pl-8" data-group="fleet">
-                        <a href="{{ route('veiculo.index') }}"
-                            class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('veiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Veículos</a>
-                        <a href="{{ route('veiculo.list') }}"
-                            class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">listar
-                            veículos</a>
-                        <a href="{{ route('tipoVeiculo.index') }}"
-                            class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Tipos de veículo</a>
-                        <a href="{{ route('tipoVeiculo.index') }}"
-                            class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}"> listar Tipos de Veículo</a>
+                        {{-- Veículos e Tipos SÓ para admin --}}
+                        @if($user && $user->role_id == 2)
+                            <a href="{{ route('veiculo.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('veiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Veículos</a>
+                            <a href="{{ route('veiculo.list') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar veículos</a>
+                            <a href="{{ route('tipoVeiculo.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Tipos de veículo</a>
+                            <a href="{{ route('tipoVeiculo.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Listar Tipos de Veículo</a>
+                        @else
+                            {{-- Usuário comum não vê itens de frota --}}
+                            <div class="text-xs text-gray-400 italic px-3 py-2">Acesso a frota restrito ao administrador</div>
+                        @endif
                     </div>
                 </div>
 
@@ -214,48 +200,58 @@
                     </button>
 
                     <div class="mt-1 space-y-1 pl-8" data-group="operations">
-                        <a href="{{ route('movimentacao.index') }}"
-                            class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('movimentacao.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Movimentações</a>
-                        <a href="{{ route('movimentacao.list') }}"
-                            class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
-                            Movimentações</a>
+                        {{-- Movimentações: ADMIN vê listagens; COMUM vê apenas o link para abrir/criar movimentação --}}
+                        @if($user && $user->role_id == 2)
+                            <a href="{{ route('movimentacao.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('movimentacao.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Movimentações</a>
+                            <a href="{{ route('movimentacao.list') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar Movimentações</a>
+                        @else
+                            {{-- Usuário comum: link direto para página onde ele cria movimentação.
+                                 Ajuste a URL abaixo para onde seu formulário de criação realmente está. --}}
+                            <a href="{{ url('/movimentacao') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Nova Movimentação</a>
+                        @endif
+
+                        {{-- Motorista / perfil: ambos podem ver --}}
                         <a href="{{ route('user.index') }}"
                             class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('user.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Motorista</a>
                     </div>
                 </div>
 
-                {{-- Admin group --}}
-                <div class="px-1">
-                    <button type="button"
-                        class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
-                        data-toggle-group="admin" aria-expanded="false">
-                        <div class="flex items-center gap-3">
-                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3zM6.5 20h11a2 2 0 002-2v-2a4 4 0 00-4-4h-7a4 4 0 00-4 4v2a2 2 0 002 2z" />
+                {{-- Admin group: completamente escondido para não-admin --}}
+                @if($user && $user->role_id == 2)
+                    <div class="px-1">
+                        <button type="button"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
+                            data-toggle-group="admin" aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3zM6.5 20h11a2 2 0 002-2v-2a4 4 0 00-4-4h-7a4 4 0 00-4 4v2a2 2 0 002 2z" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Admin</span>
+                            </div>
+                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor"
+                                aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">Admin</span>
+                        </button>
+
+                        <div class="mt-1 space-y-1 pl-8" data-group="admin">
+                            <a href="{{ route('user.list') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
+                            <a href="#"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Relatórios</a>
+                            <a href="#"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Configurações</a>
                         </div>
-                        <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                            aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-
-                    <div class="mt-1 space-y-1 pl-8 hidden" data-group="admin">
-                        <a href="{{ route('user.list') }}"
-                            class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
-                        <a href=""
-                            class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Relatórios</a>
-                        <a href=""
-                            class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Configurações</a>
                     </div>
-                </div>
+                @endif
 
-                {{-- quick links separator --}}
                 <div class="border-t border-gray-100 my-3"></div>
 
                 <div class="px-1">
@@ -267,24 +263,18 @@
 
             </nav>
 
-            {{-- footer of sidebar --}}
             <div class="p-4 border-t border-gray-100">
                 <div class="text-xs text-gray-500">Versão: <strong class="text-gray-700">1.0.0</strong></div>
             </div>
         </div>
     </aside>
 
-    {{-- overlay mobile (when sidebar open) --}}
-    <div id="sidebarOverlay" class="fixed inset-0 z-40 bg-black bg-opacity-40 hidden md:hidden" aria-hidden="true">
-    </div>
+    <div id="sidebarOverlay" class="fixed inset-0 z-40 bg-black bg-opacity-40 hidden md:hidden" aria-hidden="true"></div>
 
-    {{-- Logout form --}}
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
-    {{-- MAIN --}}
     <main class="safe-area">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {{-- Page header --}}
             <div class="pt-4 sm:pt-6 pb-4">
                 <div class="flex items-center justify-between gap-4">
                     <div>
@@ -295,19 +285,16 @@
                 </div>
             </div>
 
-            {{-- Content --}}
             <section class="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
                 @yield('content')
             </section>
 
-            {{-- Mobile quick actions --}}
             <div class="md:hidden mt-6">
                 <div class="flex gap-3">@yield('mobile_quick_actions')</div>
             </div>
         </div>
     </main>
 
-    {{-- FOOTER --}}
     <footer class="mt-8 py-6 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div>Prefeitura Municipal — Sistema de Gestão de Frota</div>
@@ -346,14 +333,12 @@
 
             if (overlay) overlay.addEventListener('click', closeSidebar);
 
-            // close sidebar on small-screen link click
             document.querySelectorAll('#sidebar a').forEach(function(el) {
                 el.addEventListener('click', function() {
                     if (window.innerWidth < 768) closeSidebar();
                 });
             });
 
-            // user dropdown
             if (userBtn && userMenu) {
                 userBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -362,19 +347,15 @@
                     userBtn.setAttribute('aria-expanded', expanded);
                 });
                 document.addEventListener('click', function(e) {
-                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) userMenu.classList.add(
-                        'hidden');
+                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) userMenu.classList.add('hidden');
                 });
             }
 
-            // groups collapse control with persistence
             const groupToggles = document.querySelectorAll('[data-toggle-group]');
             groupToggles.forEach(btn => {
-                const key = 'sidebar_group_' + (btn.getAttribute('data-toggle-group') || btn.textContent
-            .trim());
+                const key = 'sidebar_group_' + (btn.getAttribute('data-toggle-group') || btn.textContent.trim());
                 const targetName = btn.getAttribute('data-toggle-group');
                 const panel = document.querySelector('[data-group="' + targetName + '"]');
-                // restore state
                 const stored = localStorage.getItem(key);
                 if (stored === 'open') {
                     panel && panel.classList.remove('hidden');
@@ -383,7 +364,6 @@
                     panel && panel.classList.add('hidden');
                     btn.querySelector('.chev') && btn.querySelector('.chev').classList.remove('chev-open');
                 } else {
-                    // default: fleet and operations open, admin closed
                     if (targetName === 'admin') {
                         panel && panel.classList.add('hidden');
                         btn.querySelector('.chev') && btn.querySelector('.chev').classList.remove('chev-open');
@@ -399,18 +379,15 @@
                     if (isHidden) {
                         panel.classList.remove('hidden');
                         localStorage.setItem(key, 'open');
-                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.add(
-                            'chev-open');
+                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.add('chev-open');
                     } else {
                         panel.classList.add('hidden');
                         localStorage.setItem(key, 'closed');
-                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.remove(
-                            'chev-open');
+                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.remove('chev-open');
                     }
                 });
             });
 
-            // sidebar search (filters visible anchors)
             if (sidebarSearch) {
                 const anchors = Array.from(document.querySelectorAll('#sidebar a'));
                 const normalize = (s) => s ? s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '') : '';
@@ -429,7 +406,6 @@
                 });
             }
 
-            // ensure sidebar visible on desktop resize
             window.addEventListener('resize', function() {
                 if (window.innerWidth >= 768) {
                     sidebar && sidebar.classList.remove('-translate-x-full');
@@ -437,7 +413,6 @@
                 }
             });
 
-            // Notyf alerts
             const notyf = new Notyf({
                 duration: 4000,
                 position: {

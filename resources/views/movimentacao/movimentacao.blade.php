@@ -2,7 +2,8 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-xl mx-auto pb-24"> <!-- pb-24 para evitar conteúdo escondido pelo footer móvel -->
+        <div id="pageContainer" class="max-w-xl mx-auto pb-24">
+            <!-- pb-24 para evitar conteúdo escondido pelo footer móvel -->
             <div class="bg-white rounded-2xl shadow-md overflow-hidden">
                 @php
                     // determina o modo com base em movimentacao: se não tem -> saindo (iniciar), senão -> entregando (finalizar)
@@ -146,7 +147,8 @@
                     <!-- ROW: KM (aqui mudamos visual e comportamento) -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                         <label class="block">
-                            <span class="text-sm font-medium text-gray-700">KM Inicial <span class="text-red-500">*</span></span>
+                            <span class="text-sm font-medium text-gray-700">KM Inicial <span
+                                    class="text-red-500">*</span></span>
                             @if ($movimentacao->isEmpty())
                                 <input name="km_inicial" id="km_inicial" inputmode="decimal" type="number" step="0.1"
                                     value="{{ old('km_inicial') }}"
@@ -163,11 +165,12 @@
 
                         <label class="block">
                             @if ($movimentacao->isEmpty())
-                            {{-- ao iniciar, KM final começa desabilitado/oculto para indicar que ainda não foi entregue --}}
-                            <input name="km_final" id="km_final" inputmode="decimal" type="number" step="0.1"
-                            disabled hidden class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3">
+                                {{-- ao iniciar, KM final começa desabilitado/oculto para indicar que ainda não foi entregue --}}
+                                <input name="km_final" id="km_final" inputmode="decimal" type="number" step="0.1"
+                                    disabled hidden class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3">
                             @else
-                            <span class="text-sm font-medium text-gray-700">KM Final  <span class="text-red-500">*</span></span>
+                                <span class="text-sm font-medium text-gray-700">KM Final <span
+                                        class="text-red-500">*</span></span>
                                 <input name="km_final" id="km_final" inputmode="decimal" type="number" step="0.1"
                                     value="{{ old('km_final') ?? $movimentacao->first()->km_inicial }}"
                                     class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
@@ -176,7 +179,8 @@
                         </label>
 
                         <label class="" hidden>
-                            <span class="text-sm font-medium text-gray-700">KM Rodado  <span class="text-red-500">*</span></span>
+                            <span class="text-sm font-medium text-gray-700">KM Rodado <span
+                                    class="text-red-500">*</span></span>
                             <input name="km_rodado" id="km_rodado" type="number"
                                 value="{{ old('km_rodado') ?? '0.0' }}"
                                 class="mt-1 w-full rounded-lg border-gray-200 bg-gray-50 shadow-sm py-3 px-3" readonly
@@ -187,28 +191,30 @@
                     <!-- origem / destino -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label class="block">
-                            <span class="text-sm font-medium text-gray-700">Origem <span class="text-red-500">*</span></span>
+                            <span class="text-sm font-medium text-gray-700">Origem <span
+                                    class="text-red-500">*</span></span>
                             <input name="origem" id="origem" type="text" value="{{ old('origem') ?? 'SAMA' }}"
                                 class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
                                 aria-required="true">
-                                @error('origem')
-                                    <p class="text-sm text-red-500 mt-2" role="alert">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
+                            @error('origem')
+                                <p class="text-sm text-red-500 mt-2" role="alert">
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </label>
 
                         <label class="block">
-                            <span class="text-sm font-medium text-gray-700">Destino <span class="text-red-500">*</span></span>
+                            <span class="text-sm font-medium text-gray-700">Destino <span
+                                    class="text-red-500">*</span></span>
                             <input name="destino" id="destino" type="text"
                                 value="{{ old('destino') ?? ($movimentacao->first()->destino ?? '') }}"
                                 class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
                                 aria-required="true">
-                                @error('destino')
-                                    <p class="text-sm text-red-500 mt-2" role="alert">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
+                            @error('destino')
+                                <p class="text-sm text-red-500 mt-2" role="alert">
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </label>
                     </div>
 
@@ -336,9 +342,9 @@
                 (function applyInitialSelection() {
                     let initialOpt = null;
                     if (selVeiculo.selectedIndex >= 0) initialOpt = selVeiculo.options[selVeiculo
-                    .selectedIndex];
+                        .selectedIndex];
                     if ((!initialOpt || initialOpt.value === '') && selVeiculo.querySelector(
-                        'option[selected]')) {
+                            'option[selected]')) {
                         initialOpt = selVeiculo.querySelector('option[selected]');
                     }
                     if ((!initialOpt || initialOpt.value === '')) {
@@ -454,6 +460,58 @@
 
             // recálculo imediato caso já esteja em modo 'entregando'
             recalcKmRodado();
+
+            // --- scroll para o meio em mobile ---
+            (function() {
+                let scrolledToMiddle = false;
+
+                function scrollToMiddleOnMobile() {
+                    // considera mobile qualquer largura menor que 768px (ajuste se quiser)
+                    if (window.innerWidth >= 768) return;
+
+                    const el = document.getElementById('pageContainer');
+                    if (!el) return;
+
+                    // calcula posição absoluta do elemento
+                    const rect = el.getBoundingClientRect();
+                    const absoluteTop = window.scrollY + rect.top;
+
+                    // posição desejada: centro do elemento alinhado ao centro da viewport
+                    const target = absoluteTop - (window.innerHeight / 2) + (rect.height / 2);
+
+                    // não tentar scroll negativo
+                    const final = Math.max(0, Math.round(target));
+
+                    // anima o scroll suavemente
+                    window.scrollTo({
+                        top: final,
+                        behavior: 'smooth'
+                    });
+
+                    scrolledToMiddle = true;
+                }
+
+                // espera um pouquinho pro layout estabilizar (fonts, imagens etc.)
+                setTimeout(function() {
+                    if (!scrolledToMiddle) scrollToMiddleOnMobile();
+                }, 200);
+
+                // reaplica se rotacionar o aparelho (útil quando o usuário abre e gira a tela)
+                window.addEventListener('orientationchange', function() {
+                    // espera o browser reajustar
+                    setTimeout(scrollToMiddleOnMobile, 300);
+                });
+
+                // se o usuário redimensionar (ex: teclado fecha/abre), tenta novamente uma vez
+                let resizeTimer = null;
+                window.addEventListener('resize', function() {
+                    if (resizeTimer) clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function() {
+                        if (!scrolledToMiddle && window.innerWidth < 768)
+                            scrollToMiddleOnMobile();
+                    }, 250);
+                });
+            })();
         });
     </script>
 @endpush
