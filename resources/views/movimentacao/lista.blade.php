@@ -39,6 +39,7 @@
                             <tr>
                                 <th class="px-3 py-2">Data / Hora Inicio</th>
                                 <th class="px-3 py-2">Data / Hora Fim</th>
+                                <th class="px-3 py-2">Motorista</th>
                                 <th class="px-3 py-2">Veículo</th>
                                 <th class="px-3 py-2">Origem → Destino</th>
                                 <th class="px-3 py-2">KM Rodado</th>

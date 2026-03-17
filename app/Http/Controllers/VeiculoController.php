@@ -5,39 +5,28 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TipoVeiculo;
 use App\Models\Veiculo;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 class VeiculoController extends Controller
 {
+    /**
+     * Mostrar formulário de cadastro de veículo.
+     */
     public function index()
     {
         $tipoVeiculos = TipoVeiculo::all();
+
         return view('veiculo.veiculo', compact('tipoVeiculos'));
     }
 
+    /**
+     * Cadastrar novo veículo.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            // Correção 1: Adicionar aspas nas chaves e campos da regra unique
-            'placa' => 'required',
-            'marca' => 'required',
-            'modelo' => 'required',
-            // Correção 2: Adicionar aspas e ajustar a data atual corretamente
-            'ano' => 'required|integer|min:1980|max:' . date('Y'),
-            'cor' => 'required',
-            'tipo_veiculo_id' => 'required',
-            'combustivel' => 'required|in:gasolina,etanol,diesel,flex,eletrico',
-            'km_atual' => 'required',
-            'status' => 'required',
-        ], [
-            // Correção 3: Adicionar aspas nas chaves das mensagens
-            'placa.required' => 'O placa é obrigatório',
-            'marca.required' => 'A marca é obrigatória',
-            'modelo.required' => 'O modelo é obrigatório',
-            'ano.required' => 'O ano é obrigatório',
-            'cor.required' => 'A cor é obrigatória',
-            'tipo_veiculo_id.required' => 'O tipo de veículo é obrigatório',
-            'combustivel.required' => 'O combustível é obrigatório',
-        ]);
+        // validação (reusa o mesmo conjunto de regras)
+        $this->validateRequest($request);
 
         $data = $request->all();
         Veiculo::create($data);
@@ -45,50 +34,48 @@ class VeiculoController extends Controller
         return redirect()->back()->with('success', 'Veículo cadastrado com sucesso!');
     }
 
+    /**
+     * Lista paginada de veículos.
+     */
     public function list()
     {
         $veiculos = Veiculo::with('tipoVeiculo')->orderBy('placa')->paginate(15);
         $tipoVeiculos = TipoVeiculo::orderBy('nome')->get();
+
         return view('veiculo.lista', compact('veiculos', 'tipoVeiculos'));
     }
 
+    /**
+     * Remove um veículo pelo id.
+     */
     public function destroy($id)
     {
-        Veiculo::destroy($id);
-        return redirect()->back()->with('success', 'Veículo deletado com sucesso!');
+        $deleted = Veiculo::destroy($id);
+
+        $message = $deleted
+            ? 'Veículo deletado com sucesso!'
+            : 'Veículo não encontrado ou já removido.';
+
+        // manter a mesma chave flash 'success' do original para compatibilidade
+        return redirect()->back()->with('success', $message);
     }
 
+    /**
+     * Edita um veículo existente.
+     *
+     * Observação: o original aceita o id via $request->id; mantive esse comportamento.
+     */
     public function edit(Request $request)
     {
         try {
-            $request->validate(
-                [
-                    'placa' => 'required',
-                    'id' => 'required',
-                    'marca' => 'required',
-                    'modelo' => 'required',
-                    'ano' => 'required|integer|min:1980|max:' . date('Y'),
-                    'cor' => 'required',
-                    'tipo_veiculo_id' => 'required',
-                    'combustivel' => 'required|in:gasolina,etanol,diesel,flex,eletrico',
-                    'km_atual' => 'required',
-                    'status' => 'required',
-                ],
-                [
-                    'placa.required' => "placa é obrigatória",
-                    'id.required' => "id é obrigatória",
-                    'marca.required' => "marca é obrigatória",
-                    'modelo.required' => "modelo é obrigatória",
-                    'ano.required' => "ano é obrigatória",
-                    'cor.required' => "cor é obrigatória",
-                    'tipo_veiculo_id.required' => "tipo_veiculo_id é obrigatória",
-                    'combustivel.required' => "combustivel é obrigatória",
-                    'km_atual.required' => "km_atual é obrigatória",
-                    'status.required' => "status é obrigatória",
-                ]
-            );
+            $this->validateRequest($request, true);
 
             $veiculo = Veiculo::find($request->id);
+
+            if (! $veiculo) {
+                return redirect()->back()->with('error', 'Veículo não encontrado.');
+            }
+
             $veiculo->update($request->all());
 
             if ($request->ajax() || $request->wantsJson()) {
@@ -97,9 +84,62 @@ class VeiculoController extends Controller
                     'message' => 'Veículo editado com sucesso!'
                 ]);
             }
+
             return redirect()->back()->with('success', 'Veículo editado com sucesso!');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
+            // Mantive o comportamento original que retorna os erros da validação
             return redirect()->back()->with('error', $e->errors());
+        } catch (\Exception $e) {
+            // Erro genérico — ajuda no diagnóstico sem vazar stack trace
+            return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Regras de validação reutilizáveis.
+     *
+     * @param  Request  $request
+     * @param  bool     $isUpdate  adiciona validação de 'id' quando true
+     * @return void (lança ValidationException em caso de falha)
+     */
+    protected function validateRequest(Request $request, bool $isUpdate = false): void
+    {
+        $currentYear = Carbon::now()->year;
+
+        $rules = [
+            'placa' => 'required',
+            'marca' => 'required',
+            'modelo' => 'required',
+            'ano' => 'required|integer|min:1980|max:' . $currentYear,
+            'cor' => 'required',
+            'tipo_veiculo_id' => 'required',
+            'combustivel' => 'required|in:gasolina,etanol,diesel,flex,eletrico',
+            'km_atual' => 'required',
+            'status' => 'required',
+        ];
+
+        if ($isUpdate) {
+            // Para edição o código original exigia 'id'
+            $rules['id'] = 'required';
+        }
+
+        $messages = [
+            'placa.required' => 'A placa é obrigatória',
+            'marca.required' => 'A marca é obrigatória',
+            'modelo.required' => 'O modelo é obrigatório',
+            'ano.required' => 'O ano é obrigatório',
+            'ano.integer' => 'O ano deve ser um número inteiro',
+            'ano.min' => 'O ano mínimo permitido é 1980',
+            'ano.max' => "O ano não pode ser maior que {$currentYear}",
+            'cor.required' => 'A cor é obrigatória',
+            'tipo_veiculo_id.required' => 'O tipo de veículo é obrigatório',
+            'combustivel.required' => 'O combustível é obrigatório',
+            'combustivel.in' => 'Combustível inválido',
+            'km_atual.required' => 'O km atual é obrigatório',
+            'status.required' => 'O status é obrigatório',
+            'id.required' => 'O id é obrigatório',
+        ];
+
+        $request->validate($rules, $messages);
     }
 }
