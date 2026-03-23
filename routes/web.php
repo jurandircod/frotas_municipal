@@ -26,21 +26,23 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:1,2'])->group(function () {
         Route::post('/movimentacao/store', [MovimentacaoController::class, 'store'])->name('movimentacao.store');
         Route::post('/movimentacao/update/{id}', [MovimentacaoController::class, 'update'])->name('movimentacao.update');
-        Route::get('/movimentacao', [MovimentacaoController::class, 'index'])->name('movimentacao.index');
         Route::get('/user', [UserController::class, 'index'])->name('user.index');
         Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
         Route::get('/movimentacao/veiculo/{veiculoId}', [MovimentacaoController::class, 'withVeiculo'])->name('movimentacao.withVeiculo');
-        Route::get('/movimentacao/cancelar/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
+        Route::get('/movimentacao/cancelar/{id}/veiculo/{veiculoId}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard.home');
+        Route::get('/movimentacao/sucesso', [MovimentacaoController::class, 'sucesso'])->name('movimentacao.sucesso');
+        Route::get('/movimentacao/fim', [MovimentacaoController::class, 'fim'])->name('movimentacao.fim');
+        Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
     });
 
     /*
         * Rotas SOMENTE admin (role = 2)
         * Admin continua tendo acesso a tudo (incluindo as rotas acima).
         */
-    Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
     Route::middleware(['role:2'])->group(function () {
+        Route::get('/movimentacao', [MovimentacaoController::class, 'index'])->name('movimentacao.index');
         // Movimentação (visualização / listagens / cancelamentos por admin)
         Route::get('/movimentacao/list/itens', [MovimentacaoController::class, 'list'])->name('movimentacao.list');
         Route::post('/movimentacao/destroy/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.destroy');

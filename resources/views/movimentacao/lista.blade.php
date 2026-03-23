@@ -23,11 +23,15 @@
                 <div class="ml-4 w-full max-w-sm">
                     <label for="searchMov" class="sr-only">Pesquisar movimentação</label>
                     <div class="relative">
-                        <input id="searchMov" type="search" placeholder="Pesquisar por placa, motorista, origem, destino ou data"
+                        <input id="searchMov" type="search"
+                            placeholder="Pesquisar por placa, motorista, origem, destino ou data"
                             class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-                        <button id="clearSearch" type="button" class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">✕</button>
+                        <button id="clearSearch" type="button"
+                            class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">✕</button>
                     </div>
-                    <div id="searchCount" class="text-xs text-gray-500 mt-1">Mostrando <span id="searchCountNumber">{{ $movimentacoes->count() }}</span> de {{ $movimentacoes->total() ?? $movimentacoes->count() }}</div>
+                    <div id="searchCount" class="text-xs text-gray-500 mt-1">Mostrando <span
+                            id="searchCountNumber">{{ $movimentacoes->count() }}</span> de
+                        {{ $movimentacoes->total() ?? $movimentacoes->count() }}</div>
                 </div>
             </div>
 
@@ -43,6 +47,7 @@
                                 <th class="px-3 py-2">Veículo</th>
                                 <th class="px-3 py-2">Origem → Destino</th>
                                 <th class="px-3 py-2">KM Rodado</th>
+                                <th class="px-3 py-2 w-48">Observações</th>
                                 <th class="px-3 py-2 w-48">Ações</th>
                             </tr>
                         </thead>
@@ -50,10 +55,12 @@
                             @forelse($movimentacoes as $m)
                                 <tr class="border-t">
                                     <td class="px-3 py-3 text-gray-800">
-                                        {{ \Carbon\Carbon::parse($m->data)->format('d/m/Y') }} {{ substr($m->hora ?? '', 0, 5) }}
+                                        {{ \Carbon\Carbon::parse($m->data)->format('d/m/Y') }}
+                                        {{ substr($m->hora ?? '', 0, 5) }}
                                     </td>
                                     <td>
-                                        {{ \Carbon\Carbon::parse($m->data_fim)->format('d/m/Y') }} {{ substr($m->hora_fim ?? '', 0, 5) }}
+                                        {{ \Carbon\Carbon::parse($m->data_fim)->format('d/m/Y') }}
+                                        {{ substr($m->hora_fim ?? '', 0, 5) }}
                                     </td>
                                     <td class="px-3 py-3">{{ $m->user->name ?? ($m->motorista_nome ?? '-') }}</td>
                                     <td class="px-3 py-3">{{ $m->veiculo_placa ?? ($m->veiculo->placa ?? '-') }}
@@ -65,6 +72,9 @@
                                     <td class="px-3 py-3">
                                         {{ number_format($m->km_rodado ?? ($m->km_final - $m->km_inicial ?? 0), 1, ',', '.') }}
                                         km</td>
+                                    <td class="px-3 py-3 text-gray-800">
+                                        {{ $m->observacao ?? '-' }}
+                                    </td>
                                     <td class="px-3 py-3">
                                         <div class="flex gap-2">
                                             <button type="button"
@@ -129,7 +139,7 @@
                                     data-data="{{ optional($m->data)->format('Y-m-d') ?? '' }}"
                                     data-hora="{{ $m->hora ?? '' }}"
                                     data-veiculo="{{ $m->veiculo_id ?? ($m->veiculo->id ?? '') }}"
-                                    data-motorista="{{ $m->user ?? ($m->user->id ?? '') }}"
+                                    data-motorista="{{ $m->user_id ?? ($m->user->id ?? '') }}"
                                     data-tipo="{{ $m->tipo_combustivel ?? '' }}"
                                     data-km_inicial="{{ $m->km_inicial ?? '' }}" data-km_final="{{ $m->km_final ?? '' }}"
                                     data-km_rodado="{{ $m->km_rodado ?? '' }}" data-origem="{{ $m->origem ?? '' }}"
@@ -173,8 +183,6 @@
 
             <form id="editMovementForm" method="POST" class="px-6 py-6" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label class="block">
                         <span class="text-sm text-gray-700">Data</span>
@@ -188,6 +196,8 @@
                             class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3">
                     </label>
                 </div>
+
+                <input type="text" hidden name="status" id="edit_status" value="ativa">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label class="block">
                         <span class="text-sm text-gray-700">Veículo</span>
@@ -259,7 +269,7 @@
                 <div class="mt-2">
                     <label class="block">
                         <span class="text-sm text-gray-700">Observações</span>
-                        <textarea name="observacoes" id="edit_observacoes" rows="3"
+                        <textarea name="observacao" id="edit_observacoes" rows="3"
                             class="mt-2 w-full rounded-lg border-gray-300 shadow-sm py-2 px-3"></textarea>
                     </label>
                 </div>
@@ -278,7 +288,7 @@
         // ==========================
         // Busca / filtro (desktop + mobile)
         // ==========================
-        (function () {
+        (function() {
             const input = document.getElementById('searchMov');
             const clearBtn = document.getElementById('clearSearch');
             const card = document.getElementById('movementsCard');
@@ -334,12 +344,12 @@
 
             // debounce
             let timer = null;
-            input.addEventListener('input', function () {
+            input.addEventListener('input', function() {
                 if (timer) clearTimeout(timer);
                 timer = setTimeout(filterList, 200);
             });
 
-            clearBtn.addEventListener('click', function () {
+            clearBtn.addEventListener('click', function() {
                 input.value = '';
                 filterList();
                 input.focus();
@@ -359,7 +369,7 @@
         // ==========================
         // Modal de edição (mantive seu código)
         // ==========================
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('editMovementModal');
             const form = document.getElementById('editMovementForm');
             const openButtons = document.querySelectorAll('.btn-open-edit');
@@ -377,6 +387,7 @@
             const fOrigem = document.getElementById('edit_origem');
             const fDestino = document.getElementById('edit_destino');
             const fObs = document.getElementById('edit_observacoes');
+            const fStatus = document.getElementById('edit_status');
 
             // recalcula km rodado
             function recalcEditKm() {
@@ -396,7 +407,7 @@
 
             // quando trocar veículo no modal, atualiza km inicial e tipo
             if (fVeiculo) {
-                fVeiculo.addEventListener('change', function () {
+                fVeiculo.addEventListener('change', function() {
                     const opt = this.options[this.selectedIndex];
                     if (!opt) return;
                     const km = opt.getAttribute('data-km') || '';
@@ -414,7 +425,7 @@
 
             // abrir modal e preencher com data-attributes
             openButtons.forEach(btn => {
-                btn.addEventListener('click', function () {
+                btn.addEventListener('click', function() {
                     const updateRoute = this.getAttribute('data-update-route') || '';
                     // fill fields
                     if (fData) fData.value = this.getAttribute('data-data') || '';
@@ -429,7 +440,8 @@
                     if (fOrigem) fOrigem.value = this.getAttribute('data-origem') || '';
                     if (fDestino) fDestino.value = this.getAttribute('data-destino') || '';
                     if (fObs) fObs.value = this.getAttribute('data-observacoes') || '';
-                    
+                    if (fStatus) fStatus.value = this.getAttribute('data-status') || '';
+
 
                     // set form action
                     if (form) form.action = updateRoute;
@@ -438,17 +450,19 @@
                     if (modal) {
                         modal.classList.remove('hidden');
                         modal.classList.add('flex');
-                        setTimeout(() => { if (fData) fData.focus(); }, 150);
+                        setTimeout(() => {
+                            if (fData) fData.focus();
+                        }, 150);
                     }
                 });
             });
 
             // close handlers
             closeTriggers.forEach(t => t.addEventListener('click', closeModal));
-            if (modal) modal.addEventListener('click', function (e) {
+            if (modal) modal.addEventListener('click', function(e) {
                 if (e.target === modal) closeModal();
             });
-            document.addEventListener('keydown', function (e) {
+            document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeModal();
             });
 
@@ -460,17 +474,41 @@
 
             // form validation before submit
             if (form) {
-                form.addEventListener('submit', function (e) {
+                form.addEventListener('submit', function(e) {
                     // basic checks: data, motorista, veiculo, km values
-                    if (fData && !fData.value) { e.preventDefault(); alert('Informe a data.'); fData.focus(); return; }
-                    if (fMotorista && !fMotorista.value) { e.preventDefault(); alert('Informe o motorista.'); fMotorista.focus(); return; }
-                    if (fVeiculo && !fVeiculo.value) { e.preventDefault(); alert('Informe o veículo.'); fVeiculo.focus(); return; }
+                    if (fData && !fData.value) {
+                        e.preventDefault();
+                        alert('Informe a data.');
+                        fData.focus();
+                        return;
+                    }
+                    if (fMotorista && !fMotorista.value) {
+                        e.preventDefault();
+                        alert('Informe o motorista.');
+                        fMotorista.focus();
+                        return;
+                    }
+                    if (fVeiculo && !fVeiculo.value) {
+                        e.preventDefault();
+                        alert('Informe o veículo.');
+                        fVeiculo.focus();
+                        return;
+                    }
 
                     const a = parseFloat(fKmIni.value || NaN);
                     const b = parseFloat(fKmFinal.value || NaN);
 
-                    if (isNaN(a) || isNaN(b)) { e.preventDefault(); alert('Informe KM inicial e final válidos.'); return; }
-                    if (b < a) { e.preventDefault(); alert('KM Final não pode ser menor que KM Inicial.'); fKmFinal.focus(); return; }
+                    if (isNaN(a) || isNaN(b)) {
+                        e.preventDefault();
+                        alert('Informe KM inicial e final válidos.');
+                        return;
+                    }
+                    if (b < a) {
+                        e.preventDefault();
+                        alert('KM Final não pode ser menor que KM Inicial.');
+                        fKmFinal.focus();
+                        return;
+                    }
                     // if ok, the form will submit (PUT) to update route
                 });
             }

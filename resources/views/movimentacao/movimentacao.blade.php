@@ -182,7 +182,7 @@
                             <span class="text-sm font-medium text-gray-700">KM Rodado <span
                                     class="text-red-500">*</span></span>
                             <input name="km_rodado" id="km_rodado" type="number"
-                                value="{{ old('km_rodado') ?? '0.0' }}"
+                                value="{{old('km_rodado') ?? '0.0'}}"
                                 class="mt-1 w-full rounded-lg border-gray-200 bg-gray-50 shadow-sm py-3 px-3" readonly
                                 aria-readonly="true">
                         </label>
@@ -191,7 +191,7 @@
                     <!-- origem / destino -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label class="block">
-                            <span class="text-sm font-medium text-gray-700">Origem <span
+                            <span class="text-sm font-medium text-gray-700">Origem<span
                                     class="text-red-500">*</span></span>
                             <input name="origem" id="origem" type="text" value="{{ old('origem') ?? 'SAMA' }}"
                                 class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
@@ -207,7 +207,7 @@
                             <span class="text-sm font-medium text-gray-700">Destino <span
                                     class="text-red-500">*</span></span>
                             <input name="destino" id="destino" type="text"
-                                value="{{ old('destino') ?? ($movimentacao->first()->destino ?? '') }}"
+                                value="{{old('destino') ?? ($movimentacao->first()->destino ?? '')}}"
                                 class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
                                 aria-required="true">
                             @error('destino')
@@ -221,7 +221,7 @@
                     <div>
                         <label class="block">
                             <span class="text-sm font-medium text-gray-700">Observações</span>
-                            <textarea name="observacoes" id="observacoes" rows="3"
+                            <textarea name="observacao" id="observacoes" rows="3"
                                 class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" placeholder="Opcional">{{ old('observacoes') ?? ($movimentacao->first()->observacoes ?? '') }}</textarea>
                         </label>
                     </div>
@@ -237,7 +237,10 @@
                                     class="px-4 py-2 rounded-lg bg-yellow-600 text-white shadow-sm">Iniciar
                                     Corrida</button>
                             @else
-                                <a href="{{ route('movimentacao.cancelar', $movimentacao->first()->id) }}"
+                                <a href="{{ route('movimentacao.cancelar', [
+                                    'id' => $movimentacao->first()->id,
+                                    'veiculoId' => $movimentacao->first()->veiculo_id
+                                ]) }}"
                                     class="px-4 py-2 rounded-lg border border-red-300 text-red-700">Cancelar</a>
                                 <button id="submitBtn" type="submit"
                                     class="px-4 py-2 rounded-lg bg-green-600 text-white shadow-sm">Concluir
@@ -250,7 +253,10 @@
                 <!-- Mobile fixed buttons (visible only on small screens) -->
                 <div class="sm:hidden fixed inset-x-0 bottom-0 z-50 bg-white border-t p-3">
                     <div class="max-w-xl mx-auto flex gap-3">
-                        <a href="@if ($movimentacao->isEmpty()) {{ url()->previous() }} @else {{ route('movimentacao.cancelar', $movimentacao->first()->id) }} @endif"
+                        <a href="@if ($movimentacao->isEmpty()) {{ url()->previous() }} @else {{ route('movimentacao.cancelar', [
+                                    'id' => $movimentacao->first()->id,
+                                    'veiculoId' => $movimentacao->first()->veiculo_id
+                                ]) }} @endif"
                             class="flex-1 text-center py-3 rounded-lg border border-gray-300 text-sm">
                             Cancelar
                         </a>

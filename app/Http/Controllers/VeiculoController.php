@@ -28,9 +28,12 @@ class VeiculoController extends Controller
         // validação (reusa o mesmo conjunto de regras)
         $this->validateRequest($request);
 
-        $data = $request->all();
-        Veiculo::create($data);
-
+        try {
+            $data = $request->all();
+            Veiculo::create($data);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
         return redirect()->back()->with('success', 'Veículo cadastrado com sucesso!');
     }
 
@@ -107,7 +110,7 @@ class VeiculoController extends Controller
         $currentYear = Carbon::now()->year;
 
         $rules = [
-            'placa' => 'required',
+            'placa' => 'required|max:7|regex:/^[A-Z0-9]{7}$/|min:7|unique:veiculos,placa',
             'marca' => 'required',
             'modelo' => 'required',
             'ano' => 'required|integer|min:1980|max:' . $currentYear,
@@ -138,6 +141,10 @@ class VeiculoController extends Controller
             'km_atual.required' => 'O km atual é obrigatório',
             'status.required' => 'O status é obrigatório',
             'id.required' => 'O id é obrigatório',
+            'placa.max' => 'A placa deve ter no máximo 7 caracteres',
+            'placa.regex' => 'A placa deve ter no máximo 7 caracteres e somente letras e números',
+            'placa.min' => 'A placa deve ter no mínimo 7 caracteres',
+            'placa.unique' => 'Já existe um veículo com a placa informada',
         ];
 
         $request->validate($rules, $messages);

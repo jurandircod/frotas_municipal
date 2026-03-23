@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
+
 
 class MovimentacaoController extends Controller
 {
@@ -59,23 +61,49 @@ class MovimentacaoController extends Controller
      */
     public function list()
     {
-        $veiculos = Veiculo::paginate(10);
-        $users = User::paginate(10);
         $movimentacoes = Movimentacao::with('veiculo', 'user')->paginate(10);
-
+        $veiculos = Veiculo::orderBy('placa')->get();
+        $users = User::orderBy('name')->get();
         return view('movimentacao.lista', compact('veiculos', 'users', 'movimentacoes'));
     }
 
+    public function sucesso(Request $request)
+    {
+        $id = $request->id;
+        $movimentacao = Movimentacao::find($id);
+        if (!$movimentacao) {
+            return redirect()->back()->with('error', 'Movimentação não encontrada.');
+        }
+        return view('movimentacao.inicioSucesso', compact('movimentacao'));
+    }
+
+    public function fim()
+    {
+        return view('movimentacao.fimSucesso');
+    }
     /**
      * Cancela (remove) movimentação pelo id.
      */
-    public function cancelar($id)
+    public function cancelar($id, $veiculo_id)
     {
-        $deleted = Movimentacao::destroy($id);
 
-        $message = $deleted
-            ? 'Movimentação cancelada com sucesso!'
-            : 'Movimentação não encontrada ou já removida.';
+        try {
+            $valor = Cache::get('km_inicial_veiculo_' . $veiculo_id);
+            if (!$valor) {
+                $deleted = Movimentacao::where('id', $id)->update(['status' => 'cancelada']);
+                $message = $deleted
+                    ? 'Movimentação cancelada com sucesso!'
+                    : 'Movimentação não encontrada ou já removida.';
+            } else {
+                $deleted = Movimentacao::where('id', $id)->update(['status' => 'cancelada']);
+                $message = $deleted
+                    ? 'Movimentação cancelada com sucesso!'
+                    : 'Movimentação não encontrada ou já removida.';
+                Veiculo::where('id', $veiculo_id)->update(['km_atual' => $valor]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return redirect()->back()->with('success', $message);
     }
@@ -99,11 +127,14 @@ class MovimentacaoController extends Controller
 
             return redirect()->back()
                 ->withErrors($validator)
-                ->with('error', 'Erro de validação. Verifique os dados informados.')
+                ->with('error', $validator->errors()->first())
                 ->withInput();
         }
-
         // encontra movimentação
+        if ($request->km_rodado == '0.0' or $request->km_rodado == '' or $request->km_rodado < 0.0) {
+            $msg = 'Você não andou com o veículo. Por favor, verifique os dados informados.';
+            return redirect()->back()->with('error', $msg);
+        }
         $movimentacao = Movimentacao::find($id);
         if (! $movimentacao) {
             $msg = 'Movimentação não encontrada.';
@@ -130,7 +161,7 @@ class MovimentacaoController extends Controller
             ], 200);
         }
 
-        return redirect()->route('dashboard.home')->with('success', 'Movimentação editada com sucesso!');
+        return redirect()->route('movimentacao.fim')->with('success', 'Movimentação editada com sucesso!');
     }
 
     /**
@@ -147,8 +178,22 @@ class MovimentacaoController extends Controller
                 ->with('error', 'Erro de validação. Verifique os dados informados.')
                 ->withInput();
         }
-        Movimentacao::create($request->all());
-        return redirect()->back()->with('success', 'Movimentação Iniciada com sucesso!');
+        $veiculo_id = $request->veiculo_id;
+        $veiculo = Veiculo::find($veiculo_id);
+        Cache::put('km_inicial_veiculo_' . $veiculo_id, $veiculo->km_atual, now()->addMinutes(60));
+        if (!$veiculo) {
+            return redirect()->back()->with('error', 'Veículo não encontrado.');
+        }
+
+        try {
+            $veiculo->km_atual = $request->km_inicial;
+            $veiculo->save();
+            $movimentacao = Movimentacao::create($request->all());
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('movimentacao.sucesso', ['id' => $movimentacao->id])->with('success', 'Movimentação Iniciada com sucesso!');
     }
 
     /**
@@ -186,13 +231,12 @@ class MovimentacaoController extends Controller
             'user_id.required' => 'O motorista é obrigatório',
             'tipo_combustivel.required' => 'O tipo de combustível é obrigatório',
             'km_inicial.required' => 'O km inicial é obrigatório',
-            'km_rodado.required' => 'O km rodado é obrigatório',
+            'km_rodado.required' => 'A kilometragem inicial ou final está errada',
             'origem.required' => 'O origem é obrigatório',
             'status.required' => 'O status é obrigatório',
             'destino.required' => 'O destino é obrigatório',
             'km_final.required' => 'O km final é obrigatório',
         ];
-
         return Validator::make($data, $rules, $messages);
     }
 }
