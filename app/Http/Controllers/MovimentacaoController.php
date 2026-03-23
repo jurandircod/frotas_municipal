@@ -77,9 +77,11 @@ class MovimentacaoController extends Controller
         return view('movimentacao.inicioSucesso', compact('movimentacao'));
     }
 
-    public function fim()
+    public function fim(Request $request)
     {
-        return view('movimentacao.fimSucesso');
+        $id = $request->id;
+        $movimentacao = Movimentacao::find($id);
+        return view('movimentacao.fimSucesso', compact('movimentacao'));
     }
     /**
      * Cancela (remove) movimentação pelo id.
@@ -160,8 +162,7 @@ class MovimentacaoController extends Controller
                 'data' => $movimentacao
             ], 200);
         }
-
-        return redirect()->route('movimentacao.fim')->with('success', 'Movimentação editada com sucesso!');
+        return redirect()->route('movimentacao.fim', compact('id'))->with('success', 'Movimentação editada com sucesso!');
     }
 
     /**

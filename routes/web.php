@@ -42,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
         * Admin continua tendo acesso a tudo (incluindo as rotas acima).
         */
     Route::middleware(['role:2'])->group(function () {
+        // Motorista (CRUD)
         Route::get('/movimentacao', [MovimentacaoController::class, 'index'])->name('movimentacao.index');
         // Movimentação (visualização / listagens / cancelamentos por admin)
         Route::get('/movimentacao/list/itens', [MovimentacaoController::class, 'list'])->name('movimentacao.list');
