@@ -252,13 +252,17 @@
                 <!-- Mobile fixed buttons (visible only on small screens) -->
                 <div class="sm:hidden fixed inset-x-0 bottom-0 z-50 bg-white border-t p-3">
                     <div class="max-w-xl mx-auto flex gap-3">
-                        <a href="@if ($movimentacao->isEmpty()) {{ url()->previous() }} @else {{ route('movimentacao.cancelar', [
-                            'id' => $movimentacao->first()->id,
-                            'veiculoId' => $movimentacao->first()->veiculo_id,
-                        ]) }} @endif"
-                            class="flex-1 text-center py-3 rounded-lg border border-gray-300 text-sm">
-                            Cancelar
-                        </a>
+                        @if ($movimentacao->isEmpty())
+                        
+                        @else
+                            <a href="{{ route('movimentacao.cancelar', [
+                                'id' => $movimentacao->first()->id,
+                                'veiculoId' => $movimentacao->first()->veiculo_id,
+                            ]) }}"
+                                class="flex-1 text-center py-3 rounded-lg border border-gray-300 text-sm">
+                                Cancelar
+                            </a>
+                        @endif
 
                         @if ($movimentacao->isEmpty())
                             <button id="mobilePrimary" type="button"

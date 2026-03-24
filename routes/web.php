@@ -35,18 +35,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/movimentacao/sucesso', [MovimentacaoController::class, 'sucesso'])->name('movimentacao.sucesso');
         Route::get('/movimentacao/fim', [MovimentacaoController::class, 'fim'])->name('movimentacao.fim');
         Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
-    });
-
+        });
+        
     /*
-        * Rotas SOMENTE admin (role = 2)
-        * Admin continua tendo acesso a tudo (incluindo as rotas acima).
-        */
+    * Rotas SOMENTE admin (role = 2)
+    * Admin continua tendo acesso a tudo (incluindo as rotas acima).
+    */
     Route::middleware(['role:2'])->group(function () {
+        Route::post('/movimentacao/cancel/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
+        Route::post('/movimentacao/destroy/{id}', [MovimentacaoController::class, 'destroy'])->name('movimentacao.destroy');
         // Motorista (CRUD)
         Route::get('/movimentacao', [MovimentacaoController::class, 'index'])->name('movimentacao.index');
         // Movimentação (visualização / listagens / cancelamentos por admin)
         Route::get('/movimentacao/list/itens', [MovimentacaoController::class, 'list'])->name('movimentacao.list');
-        Route::post('/movimentacao/destroy/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.destroy');
 
         // Veículos (CRUD)
         Route::get('/veiculo', [VeiculoController::class, 'index'])->name('veiculo.index');

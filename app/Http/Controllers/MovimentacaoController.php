@@ -165,6 +165,16 @@ class MovimentacaoController extends Controller
         return redirect()->route('movimentacao.fim', compact('id'))->with('success', 'Movimentação editada com sucesso!');
     }
 
+    public function destroy($id)
+    {
+        $movimentacao = Movimentacao::find($id);
+        if (!$movimentacao) {
+            return redirect()->back()->with('error', 'Movimentação não encontrada.');
+        }
+        $movimentacao->delete();
+        return redirect()->back()->with('success', 'Movimentação removida com sucesso!');
+    }
+
     /**
      * Inicia e armazena uma nova movimentação.
      */
