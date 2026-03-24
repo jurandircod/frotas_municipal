@@ -59,7 +59,8 @@
                                                 data-email="{{ $m->email }}"
                                                 data-categoria="{{ $m->categoria ?? ($m->cnh_categoria ?? '') }}"
                                                 data-validade="{{ $m->validade_cnh ?? $m->cnh_validade }}"
-                                                data-update-route="{{ route('user.store', $m->id) }}">
+                                                data-update-route="{{ route('user.store', $m->id) }}"
+                                                data-role="{{ $m->role_id }}">
                                                 Alterar
                                             </button>
 
@@ -112,7 +113,9 @@
                                     data-endereco="{{ $m->endereco }}" data-status="{{ $m->status }}"
                                     data-observacoes="{{ $m->observacoes ?? '' }}"
                                     data-foto-url="{{ $m->foto_url ?? '' }}"
-                                    data-update-route="{{ route('user.edit', $m->id) }}">Alterar</button>
+                                    data-update-route="{{ route('user.edit', $m->id) }}"
+                                    data-role="{{ $m->role_id }}"
+                                    >Alterar</button>
 
                                 <form action="{{ route('user.destroy', $m->id) }}" method="POST"
                                     onsubmit="return confirmDelete(event, this, '{{ addslashes($m->nome) }}')">
@@ -143,7 +146,13 @@
                         <div class="space-y-3">
 
 
-                            
+                            <div>
+                                <label class="text-sm text-gray-600">Role</label>
+                                <select name="role_id" id="edit_role_id" class="w-full border rounded-lg px-3 py-2">
+                                    <option value="2">Administrador</option>
+                                    <option value="1">Motorista</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="text-sm text-gray-600">Nome</label>
                                 <input type="text" name="name" id="edit_nome"
@@ -247,6 +256,7 @@
                 document.getElementById('edit_validade').value = this.dataset.validade ?? '';
                 document.getElementById('edit_id').value = this.dataset.id ?? '';
                 document.getElementById('edit_email').value = this.dataset.email ?? '';
+                document.getElementById('edit_role_id').value = this.dataset.role ?? '';
 
                 form.action = this.dataset.updateRoute;
 

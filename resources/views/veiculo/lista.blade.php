@@ -26,6 +26,7 @@
         <table class="w-full text-sm">
           <thead class="text-xs text-gray-500 text-left">
             <tr>
+              <th class="px-3 py-2">Id</th>
               <th class="px-3 py-2">Placa</th>
               <th class="px-3 py-2">Marca / Modelo</th>
               <th class="px-3 py-2">Tipo</th>
@@ -37,6 +38,7 @@
           <tbody>
             @forelse($veiculos as $v)
               <tr class="border-t">
+                <td class="px-3 py-3">{{ $v->id }}</td>
                 <td class="px-3 py-3 text-gray-800 font-medium">{{ $v->placa }}</td>
                 <td class="px-3 py-3">{{ $v->marca }} • {{ $v->modelo }} ({{ $v->ano }})</td>
                 <td class="px-3 py-3">{{ $v->tipoVeiculo->nome ?? '-' }}</td>
