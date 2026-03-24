@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/movimentacao/sucesso', [MovimentacaoController::class, 'sucesso'])->name('movimentacao.sucesso');
         Route::get('/movimentacao/fim', [MovimentacaoController::class, 'fim'])->name('movimentacao.fim');
         Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
+        
         });
         
     /*
@@ -44,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:2'])->group(function () {
         Route::post('/movimentacao/cancel/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
         Route::post('/movimentacao/destroy/{id}', [MovimentacaoController::class, 'destroy'])->name('movimentacao.destroy');
+        Route::get('/movimentacoes/pdf', [MovimentacaoController::class, 'pdf'])->name('movimentacao.pdf');
         // Motorista (CRUD)
         Route::get('/movimentacao', [MovimentacaoController::class, 'index'])->name('movimentacao.index');
         // Movimentação (visualização / listagens / cancelamentos por admin)

@@ -4,10 +4,17 @@
 @section('title', 'Movimentações')
 @section('page_header', 'Movimentações')
 @section('page_actions')
-    <a href="{{ route('movimentacao.index') }}"
-        class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm">
-        Nova Movimentação
-    </a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('movimentacao.pdf') }}"
+            class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg shadow-sm text-sm">
+            Emitir PDF
+        </a>
+    
+        <a href="{{ route('movimentacao.index') }}"
+            class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm">
+            Nova Movimentação
+        </a>
+    </div>
 @endsection
 
 @section('content')

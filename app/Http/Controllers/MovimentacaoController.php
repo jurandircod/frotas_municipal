@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MovimentacaoController extends Controller
 {
@@ -108,6 +108,23 @@ class MovimentacaoController extends Controller
         }
 
         return redirect()->back()->with('success', $message);
+    }
+
+    public function pdf()
+    {
+        $movimentacoes = Movimentacao::with(['user', 'veiculo'])->where('status', 'finalizada')->where('km_rodado' , '>', 0)
+            ->orderByDesc('data')
+            ->orderByDesc('hora')
+            ->get();
+
+        $totalKm = $movimentacoes->sum(function ($m) {
+            return $m->km_rodado ?? (($m->km_final ?? 0) - ($m->km_inicial ?? 0));
+        });
+
+        $pdf = PDF::loadView('movimentacao.pdf', compact('movimentacoes', 'totalKm'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('movimentacoes-' . now()->format('Y-m-d_H-i') . '.pdf');
     }
 
     /**
