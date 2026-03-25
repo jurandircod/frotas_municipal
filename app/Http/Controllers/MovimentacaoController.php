@@ -237,7 +237,7 @@ class MovimentacaoController extends Controller
             'veiculo_id' => 'required',
             'user_id' => 'required',
             'tipo_combustivel' => 'required',
-            'km_inicial' => 'required',
+            'km_inicial' => 'required|min:0.1',
             'km_rodado' => 'required',
             'origem' => 'required',
             'status' => 'required',
@@ -264,6 +264,7 @@ class MovimentacaoController extends Controller
             'status.required' => 'O status é obrigatório',
             'destino.required' => 'O destino é obrigatório',
             'km_final.required' => 'O km final é obrigatório',
+            'km_inicial.min' => 'O km inicial deve ser maior que 0.1',
         ];
         return Validator::make($data, $rules, $messages);
     }

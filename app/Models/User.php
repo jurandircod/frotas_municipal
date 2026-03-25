@@ -30,6 +30,7 @@ class User extends Authenticatable
         'endereco',
         'status',
         'role_id',
+        'secretaria_id',
     ];
 
 

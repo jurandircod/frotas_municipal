@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
     <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
         <div id="pageContainer" class="max-w-xl mx-auto pb-24">
@@ -33,6 +32,9 @@
                                 </h1>
                                 <p class="text-sm text-gray-500 mt-1">Motorista — <span
                                         class="text-blue-600">{{ Auth::user()->name }}</span></p>
+
+                                <p class="text-sm text-gray-500 mt-1">Carro — <span
+                                        class="text-blue-600">{{ $veiculos->first()->marca ?? '' }} {{ $veiculos->first()->modelo ?? '' }}</span></p>
                             </div>
                         </div>
 
@@ -170,7 +172,7 @@
                             @else
                                 <span class="text-sm font-medium text-gray-700">KM Final <span
                                         class="text-red-500">*</span></span>
-                                <input name="km_final" id="km_final" inputmode="decimal" type="number" step="0.1"
+                                <input name="km_final" id="km_final" inputmode="decimal" type="number" placeholder="exemplo: 1234" step="0.1"
                                     value="{{ old('km_final') ?? $movimentacao->first()->km_inicial }}"
                                     class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
                                     aria-required="true">
@@ -192,8 +194,8 @@
                         <label class="block">
                             <span class="text-sm font-medium text-gray-700">Origem<span
                                     class="text-red-500">*</span></span>
-                            <input name="origem" id="origem" type="text" value="{{ old('origem') ?? 'SAMA' }}"
-                                class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
+                            <input name="origem" id="origem" type="text" value="{{ old('destino') ?? ($movimentacao->first()->origem ?? '') }}"
+                                class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required placeholder="Exemplo: Sama"
                                 aria-required="true">
                             @error('origem')
                                 <p class="text-sm text-red-500 mt-2" role="alert">
@@ -207,7 +209,7 @@
                                     class="text-red-500">*</span></span>
                             <input name="destino" id="destino" type="text"
                                 value="{{ old('destino') ?? ($movimentacao->first()->destino ?? '') }}"
-                                class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" required
+                                class="mt-1 w-full rounded-lg border-gray-300 shadow-sm py-3 px-3" placeholder="Exemplo: Paço" required
                                 aria-required="true">
                             @error('destino')
                                 <p class="text-sm text-red-500 mt-2" role="alert">
