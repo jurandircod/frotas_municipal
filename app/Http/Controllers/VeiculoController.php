@@ -7,6 +7,7 @@ use App\Models\TipoVeiculo;
 use App\Models\Veiculo;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Carbon;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class VeiculoController extends Controller
 {
@@ -25,16 +26,14 @@ class VeiculoController extends Controller
      */
     public function store(Request $request)
     {
-        // validação (reusa o mesmo conjunto de regras)
         $this->validateRequest($request);
-
         try {
-            $data = $request->all();
-            Veiculo::create($data);
+            Veiculo::create($request->all());
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return back()->with('error', 'Erro ao cadastrar veículo');
         }
-        return redirect()->back()->with('success', 'Veículo cadastrado com sucesso!');
+
+        return back()->with('success', 'Veículo cadastrado com sucesso!');
     }
 
     /**

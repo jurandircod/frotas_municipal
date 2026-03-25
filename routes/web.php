@@ -6,7 +6,9 @@ use App\Http\Controllers\TipoVeiculoController;
 use App\Http\Controllers\VeiculoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SecretariaController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -69,6 +71,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
         Route::post('/user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
+        Route::get('/secretaria', [SecretariaController::class, 'index'])->name('secretarias.index');
+        Route::post('/secretaria/store', [SecretariaController::class, 'store'])->name('secretarias.store');
         // Dashboard (apenas admin por enquanto)
     });
 });

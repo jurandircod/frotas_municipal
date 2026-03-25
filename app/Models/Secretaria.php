@@ -8,6 +8,10 @@ class secretaria extends Model
 {
     protected $table = 'secretarias';
 
+    protected $fillable = [
+        'nome',
+        'descricao',
+    ];
     public function users()
     {
         return $this->hasMany(User::class);

@@ -59,11 +59,17 @@ class MovimentacaoController extends Controller
     /**
      * Lista administrativa paginada.
      */
-    public function list()
+    public function list(Request $request)
     {
-        $movimentacoes = Movimentacao::with('veiculo', 'user')->paginate(10);
+        $pesquisa = $request->get('pesquisa');
         $veiculos = Veiculo::orderBy('placa')->get();
         $users = User::orderBy('name')->get();
+        if (!$pesquisa) {
+            $movimentacoes = Movimentacao::with('veiculo', 'user')->paginate(10);
+        } else {
+            $pesquisa = request()->get('pesquisa');
+            $movimentacoes = $this->pesquisa($pesquisa);
+        }
         return view('movimentacao.lista', compact('veiculos', 'users', 'movimentacoes'));
     }
 
@@ -110,9 +116,10 @@ class MovimentacaoController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
-    public function pdf()
+    public function pdf(Request $request)
     {
-        $movimentacoes = Movimentacao::with(['user', 'veiculo'])->where('status', 'finalizada')->where('km_rodado' , '>', 0)
+        dd($request->get('pesquisa'));
+        $movimentacoes = Movimentacao::with(['user', 'veiculo'])->where('status', 'finalizada')->where('km_rodado', '>', 0)
             ->orderByDesc('data')
             ->orderByDesc('hora')
             ->get();
@@ -267,5 +274,27 @@ class MovimentacaoController extends Controller
             'km_inicial.min' => 'O km inicial deve ser maior que 0.1',
         ];
         return Validator::make($data, $rules, $messages);
+    }
+
+    public function pesquisa($pesquisa = null)
+    {
+        $movimentacoes = Movimentacao::with('veiculo', 'user')
+            ->where(function ($query) use ($pesquisa) {
+
+                $query->whereHas('veiculo', function ($q) use ($pesquisa) {
+                    $q->where('modelo', 'like', '%' . $pesquisa . '%');
+                })
+                    ->orWhereHas('user', function ($q) use ($pesquisa) {
+                        $q->where('name', 'like', '%' . $pesquisa . '%');
+                    })
+                    ->orWhere('origem', 'like', '%' . $pesquisa . '%')
+                    ->orWhere('destino', 'like', '%' . $pesquisa . '%')
+                    ->orWhere('observacao', 'like', '%' . $pesquisa . '%')
+                    ->orWhere('data', 'like', '%' . $pesquisa . '%')
+                    ->orWhere('hora', 'like', '%' . $pesquisa . '%')
+                    ->orWhere('km_rodado', 'like', '%' . $pesquisa . '%');
+            })
+            ->paginate(10);
+        return $movimentacoes;
     }
 }

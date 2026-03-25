@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Veiculo extends Model
 {
@@ -34,5 +35,22 @@ class Veiculo extends Model
     public function movimentacoes()
     {
         return $this->hasMany(Movimentacao::class, 'veiculo_id');
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($veiculo) {
+            $url = route('movimentacao.veiculo', $veiculo->id);
+
+            $veiculo->update([
+                'veiculo_qr_code' => QrCode::format('png')
+                    ->size(200)
+                    ->margin(1)
+                    ->errorCorrection('H')
+                    ->generate($url)
+            ]);
+        });
     }
 }

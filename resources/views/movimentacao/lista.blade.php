@@ -9,7 +9,7 @@
             class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg shadow-sm text-sm">
             Emitir PDF
         </a>
-    
+
         <a href="{{ route('movimentacao.index') }}"
             class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm">
             Nova Movimentação
@@ -29,13 +29,15 @@
                 {{-- Campo de busca --}}
                 <div class="ml-4 w-full max-w-sm">
                     <label for="searchMov" class="sr-only">Pesquisar movimentação</label>
-                    <div class="relative">
-                        <input id="searchMov" type="search"
-                            placeholder="Pesquisar por placa, motorista, origem, destino ou data"
-                            class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-                        <button id="clearSearch" type="button"
-                            class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">✕</button>
-                    </div>
+                    <form action="{{ route('movimentacao.list') }}" method="GET">
+                        <div class="relative">
+                            <input  type="search" name="pesquisa"
+                                placeholder="Pesquisar por placa, motorista, origem, destino ou data"
+                                class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+                            <button id="clearSearch" type="submit"
+                                class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">✕</button>
+                        </div>
+                    </form>
                     <div id="searchCount" class="text-xs text-gray-500 mt-1">Mostrando <span
                             id="searchCountNumber">{{ $movimentacoes->count() }}</span> de
                         {{ $movimentacoes->total() ?? $movimentacoes->count() }}</div>

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Secretaria;
 
 class UserController extends Controller
 {
@@ -16,18 +17,18 @@ class UserController extends Controller
                 'name' => 'required|max:25',
                 'email' => 'required|email',                
                 ],
-            [
-                'name.required' => 'O nome é obrigatório',
-                'email.required' => 'O email é obrigatório',
-                'cpf.required' => 'O cpf é obrigatório',
-                'telefone.required' => 'O telefone é obrigatório',
-                'cnh_numero.required' => 'O cnh_numero é obrigatório',
-                'cnh_categoria.required' => 'O cnh_categoria é obrigatório',
-                'cnh_validade.required' => 'O cnh_validade é obrigatório',
-                'nascimento.required' => 'O nascimento é obrigatório',
-                'endereco.required' => 'O endereco é obrigatório',
-                'name.max' => 'O nome não pode ter mais de 25 caracteres',
-                'cpf.unique' => 'O cpf já está cadastrado',
+                [
+                    'name.required' => 'O nome é obrigatório',
+                    'email.required' => 'O email é obrigatório',
+                    'cpf.required' => 'O cpf é obrigatório',
+                    'telefone.required' => 'O telefone é obrigatório',
+                    'cnh_numero.required' => 'O cnh_numero é obrigatório',
+                    'cnh_categoria.required' => 'O cnh_categoria é obrigatório',
+                    'cnh_validade.required' => 'O cnh_validade é obrigatório',
+                    'nascimento.required' => 'O nascimento é obrigatório',
+                    'endereco.required' => 'O endereco é obrigatório',
+                    'name.max' => 'O nome não pode ter mais de 25 caracteres',
+                    'cpf.unique' => 'O cpf já está cadastrado',
             ]
         );
         
@@ -60,7 +61,9 @@ class UserController extends Controller
 
     public function list()
     {
+        
         $users = User::all();
-        return view('user.lista', compact('users'));
+        $secretarias = Secretaria::all();
+        return view('user.lista', compact('users', 'secretarias'));
     }
 }

@@ -32,6 +32,7 @@
                                 <th class="px-3 py-2">Telefone</th>
                                 <th class="px-3 py-2">CNH (cat)</th>
                                 <th class="px-3 py-2">Validade CNH</th>
+                                <th class="px-3 py-2">Secretarias</th>
                                 <th class="px-3 py-2 w-48">Ações</th>
                             </tr>
                         </thead>
@@ -49,6 +50,7 @@
                                             -
                                         @endif
                                     </td>
+                                    <td class="px-3 py-3">{{ $m->secretaria->nome ?? '-' }}</td>
                                     <td class="px-3 py-3">
                                         <div class="flex gap-2">
 
@@ -60,7 +62,9 @@
                                                 data-categoria="{{ $m->categoria ?? ($m->cnh_categoria ?? '') }}"
                                                 data-validade="{{ $m->validade_cnh ?? $m->cnh_validade }}"
                                                 data-update-route="{{ route('user.store', $m->id) }}"
-                                                data-role="{{ $m->role_id }}">
+                                                data-role="{{ $m->role_id }}"
+                                                data-secretaria="{{ $m->secretaria_id }}"
+                                                >
                                                 Alterar
                                             </button>
 
@@ -114,8 +118,7 @@
                                     data-observacoes="{{ $m->observacoes ?? '' }}"
                                     data-foto-url="{{ $m->foto_url ?? '' }}"
                                     data-update-route="{{ route('user.edit', $m->id) }}"
-                                    data-role="{{ $m->role_id }}"
-                                    >Alterar</button>
+                                    data-role="{{ $m->role_id }}">Alterar</button>
 
                                 <form action="{{ route('user.destroy', $m->id) }}" method="POST"
                                     onsubmit="return confirmDelete(event, this, '{{ addslashes($m->nome) }}')">
@@ -146,17 +149,29 @@
                         <div class="space-y-3">
 
 
-                            <div>
-                                <label class="text-sm text-gray-600">Role</label>
-                                <select name="role_id" id="edit_role_id" class="w-full border rounded-lg px-3 py-2">
-                                    <option value="2">Administrador</option>
-                                    <option value="1">Motorista</option>
-                                </select>
+                            <div class="row">
+                                <div class="col">
+                                    <label class="text-sm text-gray-600">Role</label>
+                                    <select name="role_id" id="edit_role_id" class="w-full border rounded-lg px-3 py-2">
+                                        <option value="2">Administrador</option>
+                                        <option value="1">Motorista</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="text-sm text-gray-600">Secretarias</label>
+                                    <select name="secretaria_id" id="edit_secretaria_id" class="w-full border rounded-lg px-3 py-2">
+                                        @foreach ($secretarias as $s)
+                                            <option value="{{ $s->id }}">{{ $s->nome }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
+
+
                             <div>
                                 <label class="text-sm text-gray-600">Nome</label>
                                 <input type="text" name="name" id="edit_nome"
-                                class="w-full border rounded-lg px-3 py-2">
+                                    class="w-full border rounded-lg px-3 py-2">
                             </div>
                             <div>
                                 <label class="text-sm text-gray-600">Email</label>
@@ -257,7 +272,7 @@
                 document.getElementById('edit_id').value = this.dataset.id ?? '';
                 document.getElementById('edit_email').value = this.dataset.email ?? '';
                 document.getElementById('edit_role_id').value = this.dataset.role ?? '';
-
+                document.getElementById('edit_secretaria_id').value = this.dataset.secretaria ?? '';
                 form.action = this.dataset.updateRoute;
 
             });
