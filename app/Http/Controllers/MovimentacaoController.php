@@ -119,7 +119,7 @@ class MovimentacaoController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
-    
+
     public function pdf(Request $request)
     {
         $page = $request->get('page');
@@ -315,6 +315,6 @@ class MovimentacaoController extends Controller
             });
         }
 
-        return $query->paginate(10);
+        return $query->get();
     }
 }
