@@ -71,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
         Route::post('/user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
-        Route::get('/secretaria', [SecretariaController::class, 'index'])->name('secretarias.index');
+        Route::get('/secretaria', [SecretariaController::class, 'index'])->name('secretaria.index');
         Route::post('/secretaria/store', [SecretariaController::class, 'store'])->name('secretarias.store');
         // Dashboard (apenas admin por enquanto)
     });

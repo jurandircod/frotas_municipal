@@ -67,7 +67,7 @@
                 <p class="text-sm text-gray-500">Campos com * são obrigatórios</p>
 
                 <div class="flex gap-3">
-                    <a href="{{ route('secretarias.index') }}"
+                    <a href="{{ route('secretaria.index') }}"
                        class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
                         Cancelar
                     </a>
@@ -101,7 +101,7 @@
 
 <div class="fixed inset-x-0 bottom-0 sm:hidden z-50 border-t border-gray-200 bg-white/95 backdrop-blur px-4 py-3 safe-area">
     <div class="max-w-xl mx-auto flex gap-3">
-        <a href="{{ route('secretarias.index') }}"
+        <a href="{{ route('secretaria.index') }}"
            class="flex-1 text-center py-3 rounded-xl border border-gray-300 text-gray-700 font-medium bg-white">
             Cancelar
         </a>

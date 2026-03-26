@@ -5,11 +5,13 @@
 @section('page_header', 'Movimentações')
 @section('page_actions')
     <div class="flex items-center gap-2">
-        <a href="{{ route('movimentacao.pdf') }}"
+        <a href="{{ route('movimentacao.pdf', [
+            'pesquisa' => $pesquisa,
+            'secretaria_id' => $secretaria_id,
+        ]) }}"
             class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg shadow-sm text-sm">
             Emitir PDF
         </a>
-
         <a href="{{ route('movimentacao.index') }}"
             class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm">
             Nova Movimentação
@@ -27,20 +29,47 @@
                 </div>
 
                 {{-- Campo de busca --}}
-                <div class="ml-4 w-full max-w-sm">
-                    <label for="searchMov" class="sr-only">Pesquisar movimentação</label>
+                <div class="ml-4 w-full max-w-3xl">
                     <form action="{{ route('movimentacao.list') }}" method="GET">
-                        <div class="relative">
-                            <input  type="search" name="pesquisa"
-                                placeholder="Pesquisar por placa, motorista, origem, destino ou data"
-                                class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
-                            <button id="clearSearch" type="submit"
-                                class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">✕</button>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                            <!-- Busca -->
+                            <div class="relative">
+                                <input type="search" name="pesquisa"
+                                    placeholder="Pesquisar por placa, motorista, origem..."
+                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 text-sm">
+
+                                <button id="clearSearch" type="submit"
+                                    class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">
+                                    ✕
+                                </button>
+                            </div>
+
+                            <!-- Select motorista -->
+                            <div>
+                                <select name="secretaria_id"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 text-sm">
+                                    <option value="">-- selecione --</option>
+                                    @foreach ($secretarias as $s)
+                                        <option value="{{ $s->id }}">{{ $s->nome }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white">
+                                    Buscar
+                                </button>
+                            </div>
                         </div>
+
                     </form>
-                    <div id="searchCount" class="text-xs text-gray-500 mt-1">Mostrando <span
-                            id="searchCountNumber">{{ $movimentacoes->count() }}</span> de
-                        {{ $movimentacoes->total() ?? $movimentacoes->count() }}</div>
+
+                    <div class="text-xs text-gray-500 mt-2">
+                        Mostrando {{ $movimentacoes->count() }} de
+                        {{ $movimentacoes->total() ?? $movimentacoes->count() }}
+                    </div>
                 </div>
             </div>
 

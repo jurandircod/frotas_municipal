@@ -38,11 +38,21 @@
             }
         }
 
-        .translate-x-0 { transform: translateX(0); }
-        .-translate-x-full { transform: translateX(-100%); }
+        .translate-x-0 {
+            transform: translateX(0);
+        }
 
-        .chev { transition: transform .15s ease; }
-        .chev-open { transform: rotate(90deg); }
+        .-translate-x-full {
+            transform: translateX(-100%);
+        }
+
+        .chev {
+            transition: transform .15s ease;
+        }
+
+        .chev-open {
+            transform: rotate(90deg);
+        }
     </style>
 
     @stack('styles')
@@ -69,7 +79,8 @@
                         <img src="{{ asset('images/logo-prefeitura.png') }}" alt="Logo"
                             onerror="this.style.display='none'"
                             class="h-8 w-8 rounded-md object-contain border bg-white p-1">
-                        <span class="hidden sm:inline-block text-sm font-semibold">{{ config('app.name', 'Prefeitura') }}</span>
+                        <span
+                            class="hidden sm:inline-block text-sm font-semibold">{{ config('app.name', 'Prefeitura') }}</span>
                     </a>
                 </div>
 
@@ -83,9 +94,11 @@
                             class="flex items-center gap-2 p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
                             <span class="hidden md:inline-block text-sm text-gray-700">Olá, <strong
                                     class="font-medium">{{ Auth::user()->name ?? 'Usuário' }}</strong></span>
-                            <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                            <div
+                                class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
                                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z" />
+                                    <path
+                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z" />
                                 </svg>
                             </div>
                         </button>
@@ -162,18 +175,22 @@
 
                     <div class="mt-1 space-y-1 pl-8" data-group="fleet">
                         {{-- Veículos e Tipos SÓ para admin --}}
-                        @if($user && $user->role_id == 2)
+                        @if ($user && $user->role_id == 2)
                             <a href="{{ route('veiculo.index') }}"
                                 class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('veiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Veículos</a>
                             <a href="{{ route('veiculo.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar veículos</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
+                                veículos</a>
                             <a href="{{ route('tipoVeiculo.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Tipos de veículo</a>
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Tipos
+                                de veículo</a>
                             <a href="{{ route('tipoVeiculo.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Listar Tipos de Veículo</a>
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Listar
+                                Tipos de Veículo</a>
                         @else
                             {{-- Usuário comum não vê itens de frota --}}
-                            <div class="text-xs text-gray-400 italic px-3 py-2">Acesso a frota restrito ao administrador</div>
+                            <div class="text-xs text-gray-400 italic px-3 py-2">Acesso a frota restrito ao
+                                administrador</div>
                         @endif
                     </div>
                 </div>
@@ -201,16 +218,18 @@
 
                     <div class="mt-1 space-y-1 pl-8" data-group="operations">
                         {{-- Movimentações: ADMIN vê listagens; COMUM vê apenas o link para abrir/criar movimentação --}}
-                        @if($user && $user->role_id == 2)
+                        @if ($user && $user->role_id == 2)
                             <a href="{{ route('movimentacao.index') }}"
                                 class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('movimentacao.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Movimentações</a>
                             <a href="{{ route('movimentacao.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar Movimentações</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
+                                Movimentações</a>
                         @else
                             {{-- Usuário comum: link direto para página onde ele cria movimentação.
                                  Ajuste a URL abaixo para onde seu formulário de criação realmente está. --}}
                             <a href="{{ url('/movimentacao') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Nova Movimentação</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Nova
+                                Movimentação</a>
                         @endif
 
                         {{-- Motorista / perfil: ambos podem ver --}}
@@ -220,7 +239,7 @@
                 </div>
 
                 {{-- Admin group: completamente escondido para não-admin --}}
-                @if($user && $user->role_id == 2)
+                @if ($user && $user->role_id == 2)
                     <div class="px-1">
                         <button type="button"
                             class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
@@ -244,6 +263,8 @@
                         <div class="mt-1 space-y-1 pl-8" data-group="admin">
                             <a href="{{ route('user.list') }}"
                                 class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
+                            <a href="{{ route('secretaria.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Secretarias</a>
                             <a href="#"
                                 class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Relatórios</a>
                             <a href="#"
@@ -269,7 +290,8 @@
         </div>
     </aside>
 
-    <div id="sidebarOverlay" class="fixed inset-0 z-40 bg-black bg-opacity-40 hidden md:hidden" aria-hidden="true"></div>
+    <div id="sidebarOverlay" class="fixed inset-0 z-40 bg-black bg-opacity-40 hidden md:hidden" aria-hidden="true">
+    </div>
 
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
@@ -347,13 +369,15 @@
                     userBtn.setAttribute('aria-expanded', expanded);
                 });
                 document.addEventListener('click', function(e) {
-                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) userMenu.classList.add('hidden');
+                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) userMenu.classList.add(
+                        'hidden');
                 });
             }
 
             const groupToggles = document.querySelectorAll('[data-toggle-group]');
             groupToggles.forEach(btn => {
-                const key = 'sidebar_group_' + (btn.getAttribute('data-toggle-group') || btn.textContent.trim());
+                const key = 'sidebar_group_' + (btn.getAttribute('data-toggle-group') || btn.textContent
+            .trim());
                 const targetName = btn.getAttribute('data-toggle-group');
                 const panel = document.querySelector('[data-group="' + targetName + '"]');
                 const stored = localStorage.getItem(key);
@@ -379,11 +403,13 @@
                     if (isHidden) {
                         panel.classList.remove('hidden');
                         localStorage.setItem(key, 'open');
-                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.add('chev-open');
+                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.add(
+                            'chev-open');
                     } else {
                         panel.classList.add('hidden');
                         localStorage.setItem(key, 'closed');
-                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.remove('chev-open');
+                        btn.querySelector('.chev') && btn.querySelector('.chev').classList.remove(
+                            'chev-open');
                     }
                 });
             });

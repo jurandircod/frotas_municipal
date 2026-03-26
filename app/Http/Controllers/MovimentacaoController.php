@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use App\Models\Secretaria;
 use Illuminate\Support\Facades\Cache;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -64,13 +65,15 @@ class MovimentacaoController extends Controller
         $pesquisa = $request->get('pesquisa');
         $veiculos = Veiculo::orderBy('placa')->get();
         $users = User::orderBy('name')->get();
-        if (!$pesquisa) {
+        $secretaria_id = $request->get('secretaria_id');
+        $secretarias = Secretaria::orderBy('nome')->get();
+        if (isset($pesquisa) and isset($secretaria_id)) {
             $movimentacoes = Movimentacao::with('veiculo', 'user')->paginate(10);
         } else {
             $pesquisa = request()->get('pesquisa');
-            $movimentacoes = $this->pesquisa($pesquisa);
+            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id);
         }
-        return view('movimentacao.lista', compact('veiculos', 'users', 'movimentacoes'));
+        return view('movimentacao.lista', compact('veiculos', 'users', 'movimentacoes', 'secretarias', 'pesquisa', 'secretaria_id'));
     }
 
     public function sucesso(Request $request)
@@ -116,13 +119,20 @@ class MovimentacaoController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
+    
     public function pdf(Request $request)
     {
-        dd($request->get('pesquisa'));
-        $movimentacoes = Movimentacao::with(['user', 'veiculo'])->where('status', 'finalizada')->where('km_rodado', '>', 0)
-            ->orderByDesc('data')
-            ->orderByDesc('hora')
-            ->get();
+        $page = $request->get('page');
+        $pesquisa = $request->get('pesquisa');
+        $secretaria_id = $request->get('secretaria_id');
+        if (isset($pesquisa) and isset($secretaria_id)) {
+            $movimentacoes = Movimentacao::with(['user', 'veiculo'])->where('status', 'finalizada')->where('km_rodado', '>', 0)
+                ->orderByDesc('data')
+                ->orderByDesc('hora')
+                ->get();
+        } else {
+            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id);
+        }
 
         $totalKm = $movimentacoes->sum(function ($m) {
             return $m->km_rodado ?? (($m->km_final ?? 0) - ($m->km_inicial ?? 0));
@@ -276,25 +286,35 @@ class MovimentacaoController extends Controller
         return Validator::make($data, $rules, $messages);
     }
 
-    public function pesquisa($pesquisa = null)
+    public function pesquisa($pesquisa = null, $secretaria_id = null)
     {
-        $movimentacoes = Movimentacao::with('veiculo', 'user')
-            ->where(function ($query) use ($pesquisa) {
+        $query = Movimentacao::with('veiculo', 'user');
 
-                $query->whereHas('veiculo', function ($q) use ($pesquisa) {
-                    $q->where('modelo', 'like', '%' . $pesquisa . '%');
+        // 🔎 Busca por texto
+        if (!empty($pesquisa)) {
+            $query->where(function ($q) use ($pesquisa) {
+                $q->whereHas('veiculo', function ($q2) use ($pesquisa) {
+                    $q2->where('modelo', 'like', "%{$pesquisa}%");
                 })
-                    ->orWhereHas('user', function ($q) use ($pesquisa) {
-                        $q->where('name', 'like', '%' . $pesquisa . '%');
+                    ->orWhereHas('user', function ($q2) use ($pesquisa) {
+                        $q2->where('name', 'like', "%{$pesquisa}%");
                     })
-                    ->orWhere('origem', 'like', '%' . $pesquisa . '%')
-                    ->orWhere('destino', 'like', '%' . $pesquisa . '%')
-                    ->orWhere('observacao', 'like', '%' . $pesquisa . '%')
-                    ->orWhere('data', 'like', '%' . $pesquisa . '%')
-                    ->orWhere('hora', 'like', '%' . $pesquisa . '%')
-                    ->orWhere('km_rodado', 'like', '%' . $pesquisa . '%');
-            })
-            ->paginate(10);
-        return $movimentacoes;
+                    ->orWhere('origem', 'like', "%{$pesquisa}%")
+                    ->orWhere('destino', 'like', "%{$pesquisa}%")
+                    ->orWhere('observacao', 'like', "%{$pesquisa}%")
+                    ->orWhere('data', 'like', "%{$pesquisa}%")
+                    ->orWhere('hora', 'like', "%{$pesquisa}%")
+                    ->orWhere('km_rodado', 'like', "%{$pesquisa}%");
+            });
+        }
+
+        // 🏢 Filtro por secretaria (se existir)
+        if (!empty($secretaria_id)) {
+            $query->whereHas('user', function ($q) use ($secretaria_id) {
+                $q->where('secretaria_id', $secretaria_id);
+            });
+        }
+
+        return $query->paginate(10);
     }
 }
