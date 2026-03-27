@@ -6,8 +6,10 @@
 @section('page_actions')
     <div class="flex items-center gap-2">
         <a href="{{ route('movimentacao.pdf', [
-            'pesquisa' => $pesquisa,
-            'secretaria_id' => $secretaria_id,
+            'pesquisa' => $pesquisa ?? '',
+            'secretaria_id' => $secretaria_id ?? '',
+            'data_inicial' => $dataInicial ?? '',
+            'data_final' => $dataFinal ?? '',
         ]) }}"
             class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg shadow-sm text-sm">
             Emitir PDF
@@ -23,50 +25,82 @@
     <div class="space-y-4">
         <div id="movementsCard" class="bg-white rounded-xl p-4 shadow-sm">
             <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-700">Movimentações</h3>
-                    <p class="text-xs text-gray-500">Visualize, edite ou exclua movimentações.</p>
-                </div>
 
                 {{-- Campo de busca --}}
-                <div class="ml-4 w-full max-w-3xl">
-                    <form action="{{ route('movimentacao.list') }}" method="GET">
+                <div class="ml-4 w-full max-w-5xl">
+                    <form action="{{ route('movimentacao.list') }}" method="GET" class="w-full">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-4 items-end">
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {{-- Busca --}}
+                            <div>
+                                <label for="pesquisa" class="mb-1 block text-sm font-medium text-gray-700">
+                                    Busca
+                                </label>
+                                <div class="relative">
+                                    <input type="search" name="pesquisa" id="pesquisa" value="{{ request('pesquisa') }}"
+                                        placeholder="Pesquisar por placa, motorista, origem..."
+                                        class="w-full rounded-lg border-gray-300 shadow-sm py-2.5 px-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500">
 
-                            <!-- Busca -->
-                            <div class="relative">
-                                <input type="search" name="pesquisa"
-                                    placeholder="Pesquisar por placa, motorista, origem..."
-                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 text-sm">
-
-                                <button id="clearSearch" type="submit"
-                                    class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 text-sm hidden">
-                                    ✕
-                                </button>
+                                    @if (request('pesquisa'))
+                                        <a href="{{ route('movimentacao.list') }}"
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm hover:text-gray-700">
+                                            ✕
+                                        </a>
+                                    @endif
+                                </div>
                             </div>
 
-                            <!-- Select motorista -->
+                            {{-- Data inicial --}}
                             <div>
-                                <select name="secretaria_id"
-                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2 px-3 text-sm">
+                                <label for="data_inicial" class="mb-1 block text-sm font-medium text-gray-700">
+                                    Data inicial
+                                </label>
+                                <input type="date" name="data_inicial" id="data_inicial"
+                                    value="{{ request('data_inicial') }}"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2.5 px-3 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            {{-- Data final --}}
+                            <div>
+                                <label for="data_final" class="mb-1 block text-sm font-medium text-gray-700">
+                                    Data final
+                                </label>
+                                <input type="date" name="data_final" id="data_final" value="{{ request('data_final') }}"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2.5 px-3 text-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            {{-- Secretaria --}}
+                            <div>
+                                <label for="secretaria_id" class="mb-1 block text-sm font-medium text-gray-700">
+                                    Secretaria
+                                </label>
+                                <select name="secretaria_id" id="secretaria_id"
+                                    class="w-full rounded-lg border-gray-300 shadow-sm py-2.5 px-3 text-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="">-- selecione --</option>
                                     @foreach ($secretarias as $s)
-                                        <option value="{{ $s->id }}">{{ $s->nome }}</option>
+                                        <option value="{{ $s->id }}" @selected(request('secretaria_id') == $s->id)>
+                                            {{ $s->nome }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            <div>
-                                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white">
+                            {{-- Botão --}}
+                            <div class="md:col-span-4 flex justify-end gap-2">
+                                <button type="submit"
+                                    class="rounded-lg bg-blue-600 px-5 py-2.5 text-white shadow-sm hover:bg-blue-700">
                                     Buscar
                                 </button>
+
+                                <a href="{{ route('movimentacao.list') }}"
+                                    class="rounded-lg bg-gray-200 px-5 py-2.5 text-gray-700 shadow-sm hover:bg-gray-300">
+                                    Limpar
+                                </a>
                             </div>
                         </div>
-
                     </form>
 
-                    <div class="text-xs text-gray-500 mt-2">
+                    <div class="mt-2 text-xs text-gray-500">
                         Mostrando {{ $movimentacoes->count() }} de
                         {{ $movimentacoes->total() ?? $movimentacoes->count() }}
                     </div>
@@ -145,7 +179,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td class="px-3 py-4 text-gray-500" colspan="6">Nenhuma movimentação registrada.</td>
+                                    <td class="px-3 py-4 text-gray-500" colspan="6">Nenhuma movimentação registrada.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -179,9 +214,9 @@
                                     data-veiculo="{{ $m->veiculo_id ?? ($m->veiculo->id ?? '') }}"
                                     data-motorista="{{ $m->user_id ?? ($m->user->id ?? '') }}"
                                     data-tipo="{{ $m->tipo_combustivel ?? '' }}"
-                                    data-km_inicial="{{ $m->km_inicial ?? '' }}" data-km_final="{{ $m->km_final ?? '' }}"
-                                    data-km_rodado="{{ $m->km_rodado ?? '' }}" data-origem="{{ $m->origem ?? '' }}"
-                                    data-destino="{{ $m->destino ?? '' }}"
+                                    data-km_inicial="{{ $m->km_inicial ?? '' }}"
+                                    data-km_final="{{ $m->km_final ?? '' }}" data-km_rodado="{{ $m->km_rodado ?? '' }}"
+                                    data-origem="{{ $m->origem ?? '' }}" data-destino="{{ $m->destino ?? '' }}"
                                     data-observacoes="{{ addslashes($m->observacao ?? ($m->observacoes ?? '')) }}"
                                     data-status="{{ $m->status ?? 'ativa' }}"
                                     data-update-route="{{ route('movimentacao.update', $m->id) }}">Alterar</button>

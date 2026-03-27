@@ -66,12 +66,14 @@ class MovimentacaoController extends Controller
         $veiculos = Veiculo::orderBy('placa')->get();
         $users = User::orderBy('name')->get();
         $secretaria_id = $request->get('secretaria_id');
+        $dataInicial = $request->get('data_inicial');
+        $dataFinal = $request->get('data_final');
         $secretarias = Secretaria::orderBy('nome')->get();
         if (isset($pesquisa) and isset($secretaria_id)) {
             $movimentacoes = Movimentacao::with('veiculo', 'user')->paginate(10);
         } else {
             $pesquisa = request()->get('pesquisa');
-            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id);
+            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id, $dataInicial, $dataFinal)->paginate(10);
         }
         return view('movimentacao.lista', compact('veiculos', 'users', 'movimentacoes', 'secretarias', 'pesquisa', 'secretaria_id'));
     }
@@ -122,7 +124,8 @@ class MovimentacaoController extends Controller
 
     public function pdf(Request $request)
     {
-        $page = $request->get('page');
+        $dataInicial = $request->get('data_inicial');
+        $dataFinal = $request->get('data_final');
         $pesquisa = $request->get('pesquisa');
         $secretaria_id = $request->get('secretaria_id');
         if (isset($pesquisa) and isset($secretaria_id)) {
@@ -131,7 +134,7 @@ class MovimentacaoController extends Controller
                 ->orderByDesc('hora')
                 ->get();
         } else {
-            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id);
+            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id)->get();
         }
 
         $totalKm = $movimentacoes->sum(function ($m) {
@@ -286,7 +289,7 @@ class MovimentacaoController extends Controller
         return Validator::make($data, $rules, $messages);
     }
 
-    public function pesquisa($pesquisa = null, $secretaria_id = null)
+    public function pesquisa($pesquisa = null, $secretaria_id = null, $dataInicial = null, $dataFinal = null)
     {
         $query = Movimentacao::with('veiculo', 'user');
 
@@ -314,7 +317,10 @@ class MovimentacaoController extends Controller
                 $q->where('secretaria_id', $secretaria_id);
             });
         }
-
-        return $query->get();
+        // 📅 Filtro por data
+        if (!empty($dataInicial) and !empty($dataFinal)) {
+            $query->whereBetween('data_fim', [$dataInicial, $dataFinal]);
+        }
+        return $query;
     }
 }
