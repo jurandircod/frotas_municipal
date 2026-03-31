@@ -163,11 +163,11 @@ class MovimentacaoController extends Controller
                     'message' => 'Erro de validação. Verifique os dados enviados.'
                 ], 422);
             }
-
+            
             return redirect()->back()
-                ->withErrors($validator)
-                ->with('error', $validator->errors()->first())
-                ->withInput();
+            ->withErrors($validator)
+            ->with('error', $validator->errors()->first())
+            ->withInput();
         }
         // encontra movimentação
         if ($request->km_rodado == '0.0' or $request->km_rodado == '' or $request->km_rodado < 0.0) {

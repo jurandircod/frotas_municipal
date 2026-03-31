@@ -4,6 +4,8 @@ const urlsToCache = [
     '/',
     '/login',
     '/movimentacao',
+    '/css/app.css',
+    '/js/app.js',
     '/icons/icon-192.png'
 ];
 
