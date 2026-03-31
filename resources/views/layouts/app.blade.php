@@ -8,6 +8,14 @@
 
     <title>@yield('title', config('app.name', 'Sistema de Frota'))</title>
 
+
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Movimentação">
+
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
     {{-- Tailwind CDN --}}
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
@@ -157,8 +165,8 @@
                         class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
                         data-toggle-group="fleet" aria-expanded="true">
                         <div class="flex items-center gap-3">
-                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                aria-hidden="true">
+                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 7h18M5 7v13a1 1 0 001 1h2a1 1 0 001-1V7M15 7v13a1 1 0 001 1h2a1 1 0 001-1V7">
                                 </path>
@@ -377,7 +385,7 @@
             const groupToggles = document.querySelectorAll('[data-toggle-group]');
             groupToggles.forEach(btn => {
                 const key = 'sidebar_group_' + (btn.getAttribute('data-toggle-group') || btn.textContent
-            .trim());
+                    .trim());
                 const targetName = btn.getAttribute('data-toggle-group');
                 const panel = document.querySelector('[data-group="' + targetName + '"]');
                 const stored = localStorage.getItem(key);
@@ -469,6 +477,20 @@
     </script>
 
     @stack('scripts')
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registrado:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Erro ao registrar Service Worker:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>
