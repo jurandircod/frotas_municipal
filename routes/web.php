@@ -17,7 +17,6 @@ Route::get('/', function () {
 require __DIR__ . '/auth.php';
 
 Route::middleware(['auth'])->group(function () {
-
     /*
      * Rotas que AMBOS (role 1 e role 2) podem acessar:
      * - criar movimentação
@@ -45,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     * Admin continua tendo acesso a tudo (incluindo as rotas acima).
     */
     Route::middleware(['role:2'])->group(function () {
+
         Route::post('/movimentacao/cancel/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
         Route::post('/movimentacao/destroy/{id}', [MovimentacaoController::class, 'destroy'])->name('movimentacao.destroy');
         Route::get('/movimentacoes/pdf', [MovimentacaoController::class, 'pdf'])->name('movimentacao.pdf');

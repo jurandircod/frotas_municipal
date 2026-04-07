@@ -109,7 +109,7 @@ class VeiculoController extends Controller
         $currentYear = Carbon::now()->year;
 
         $rules = [
-            'placa' => 'required|max:7|regex:/^[A-Z0-9]{7}$/|min:7|unique:veiculos,placa',
+            'placa' => 'required|max:9',
             'marca' => 'required',
             'modelo' => 'required',
             'ano' => 'required|integer|min:1980|max:' . $currentYear,

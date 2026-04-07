@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\Secretaria;
 use Illuminate\Support\Facades\Cache;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -27,15 +28,14 @@ class MovimentacaoController extends Controller
      */
     public function index()
     {
+        
         $veiculos = Veiculo::all();
         $user = Auth::user();
-
         $movimentacao = Movimentacao::where('status', 'ativa')
             ->where('user_id', $user->id)
             ->with('veiculo', 'user')
             ->get();
-
-        return view('movimentacao.movimentacao', compact('veiculos', 'user', 'movimentacao'));
+        return view('movimentacao.selectVeiculo', compact('veiculos'));
     }
 
     /**
@@ -46,9 +46,7 @@ class MovimentacaoController extends Controller
         $veiculos = Veiculo::where('id', $veiculoId)
             ->with('tipoVeiculo')
             ->get();
-
         $user = Auth::user();
-
         $movimentacao = Movimentacao::where('status', 'ativa')
             ->where('user_id', $user->id)
             ->with('veiculo', 'user')
@@ -163,11 +161,11 @@ class MovimentacaoController extends Controller
                     'message' => 'Erro de validação. Verifique os dados enviados.'
                 ], 422);
             }
-            
+
             return redirect()->back()
-            ->withErrors($validator)
-            ->with('error', $validator->errors()->first())
-            ->withInput();
+                ->withErrors($validator)
+                ->with('error', $validator->errors()->first())
+                ->withInput();
         }
         // encontra movimentação
         if ($request->km_rodado == '0.0' or $request->km_rodado == '' or $request->km_rodado < 0.0) {
@@ -292,7 +290,6 @@ class MovimentacaoController extends Controller
     public function pesquisa($pesquisa = null, $secretaria_id = null, $dataInicial = null, $dataFinal = null)
     {
         $query = Movimentacao::with('veiculo', 'user');
-
         // 🔎 Busca por texto
         if (!empty($pesquisa)) {
             $query->where(function ($q) use ($pesquisa) {
