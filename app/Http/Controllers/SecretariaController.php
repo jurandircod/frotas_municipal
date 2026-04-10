@@ -12,10 +12,25 @@ class SecretariaController extends Controller
         return view('secretaria.index');
     }
 
+    public function list()
+    {
+        $secretarias = Secretaria::paginate();
+        return view('secretaria.list', compact('secretarias'));
+    }
+
+
+    public function destroy($id)
+    {
+        $deleted = Secretaria::destroy($id);
+        if (!$deleted) {
+            return redirect()->route('secretaria.list')->with('error', 'Erro ao deletar secretaria!');
+        }
+        return redirect()->route('secretaria.list')->with('success', 'Secretaria deletada com sucesso!');
+    }
     public function store(Request $request)
     {
-        
+
         $secretaria = Secretaria::create($request->all());
-        return redirect()->route('secretarias.index')->with('success', 'Secretaria criada com sucesso!');
+        return redirect()->route('secretaria.list')->with('success', 'Secretaria criada com sucesso!');
     }
 }

@@ -73,6 +73,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/secretaria', [SecretariaController::class, 'index'])->name('secretaria.index');
         Route::post('/secretaria/store', [SecretariaController::class, 'store'])->name('secretarias.store');
+        Route::get('/secretaria/list', [SecretariaController::class, 'list'])->name('secretaria.list');
+        Route::post('/secretaria/destroy/{id}', [SecretariaController::class, 'destroy'])->name('secretaria.destroy');
+        Route::post('/secretaria/edit', [SecretariaController::class, 'edit'])->name('secretaria.edit');
         // Dashboard (apenas admin por enquanto)
     });
 });

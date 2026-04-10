@@ -272,7 +272,9 @@
                             <a href="{{ route('user.list') }}"
                                 class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
                             <a href="{{ route('secretaria.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Secretarias</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Cadastrar Secretarias</a>
+                            <a href="{{ route('secretaria.list') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar Secretarias</a>
                             <a href="#"
                                 class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Relatórios</a>
                             <a href="#"
