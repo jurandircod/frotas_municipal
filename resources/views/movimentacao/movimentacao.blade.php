@@ -1,592 +1,228 @@
 @extends('layouts.app')
-@section('content')
 
+@section('content')
     @php
         $isStarting = $movimentacao->isEmpty();
-        $mode = $isStarting ? 'saindo' : 'entregando';
-        // step: 0 = aguardando, 1 = em corrida, 2 = finalizado
         $step = $isStarting ? 0 : 1;
+        $veiculo = $isStarting ? $veiculos->first() : $movimentacao->first()->veiculo;
     @endphp
 
+    {{-- Google Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-
-        .mov-root * {
-            box-sizing: border-box;
+        .font-nunito {
+            font-family: 'Nunito', sans-serif;
         }
 
-        .mov-root {
-            font-family: 'DM Sans', sans-serif;
-            min-height: 100vh;
-            background: #f4f6fa;
-            padding: 1.5rem 1rem 7rem;
+        .font-sora {
+            font-family: 'Sora', sans-serif;
         }
 
-        /* ── CARD ── */
-        .mov-card {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, .08);
-            overflow: hidden;
+        .field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
         }
 
-        /* ── HEADER ── */
-        .mov-header {
-            padding: 1.5rem 1.75rem 1.25rem;
-            border-bottom: 1px solid #f0f0f3;
-            background: #fafbff;
+        .field-error {
+            border-color: #ef4444 !important;
+            background: #fef2f2 !important;
         }
 
-        .mov-header-top {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: .75rem;
+        .field-error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .15) !important;
         }
 
-        .mov-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            flex-shrink: 0;
-        }
-
-        .mov-avatar.yellow {
-            background: #fef3c7;
-        }
-
-        .mov-avatar.green {
-            background: #d1fae5;
-        }
-
-        .mov-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #111827;
-            margin: 0;
-        }
-
-        .mov-meta {
-            font-size: .8rem;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-
-        .mov-meta span {
-            color: #3b82f6;
-            font-weight: 600;
-        }
-
-        .mov-badge {
-            margin-left: auto;
-            padding: .3rem .9rem;
-            border-radius: 999px;
-            font-size: .75rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .mov-badge.yellow {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .mov-badge.green {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        /* ── PROGRESS TIMELINE ── */
-        .timeline-wrap {
-            padding: 1.25rem 1.75rem 0;
-        }
-
-        .timeline {
-            display: flex;
-            align-items: center;
-            position: relative;
-            gap: 0;
-        }
-
-        /* linha de fundo (cinza) */
-        .timeline-track {
-            position: absolute;
-            top: 50%;
-            left: 24px;
-            right: 24px;
-            height: 4px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            transform: translateY(-50%);
-            z-index: 0;
-        }
-
-        /* linha de progresso (colorida) */
-        .timeline-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .tl-fill {
             height: 100%;
-            border-radius: 4px;
+            border-radius: 9999px;
             transition: width .5s ease;
         }
 
-        .timeline-fill.step0 {
+        .tl-fill-0 {
             width: 0%;
             background: #f59e0b;
         }
 
-        .timeline-fill.step1 {
+        .tl-fill-1 {
             width: 50%;
             background: linear-gradient(90deg, #f59e0b, #10b981);
         }
 
-        .timeline-fill.step2 {
+        .tl-fill-2 {
             width: 100%;
             background: #10b981;
         }
 
-        /* nós */
-        .tl-node {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
+        .ring-amber {
+            box-shadow: 0 0 0 5px rgba(251, 191, 36, .25);
         }
 
-        .tl-dot {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 3px solid #e5e7eb;
-            background: #fff;
+        .divider {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            transition: all .3s ease;
-            position: relative;
-        }
-
-        .tl-dot.done {
-            border-color: #10b981;
-            background: #d1fae5;
-        }
-
-        .tl-dot.active {
-            border-color: #f59e0b;
-            background: #fef3c7;
-            box-shadow: 0 0 0 4px #fef3c740;
-        }
-
-        .tl-dot.pending {
-            opacity: .5;
-        }
-
-        .tl-label {
-            margin-top: .45rem;
-            font-size: .7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            color: #9ca3af;
-            text-align: center;
-        }
-
-        .tl-label.active {
-            color: #d97706;
-        }
-
-        .tl-label.done {
-            color: #059669;
-        }
-
-        .tl-time {
-            font-size: .65rem;
-            color: #b0b7c3;
-            margin-top: 1px;
-        }
-
-        /* hint abaixo da timeline */
-        .timeline-hint {
-            font-size: .78rem;
-            color: #6b7280;
-            padding: .6rem 0 1rem;
-            text-align: center;
-        }
-
-        /* ── FORM ── */
-        .mov-form {
-            padding: 1.5rem 1.75rem;
-        }
-
-        .form-row {
-            display: grid;
-            gap: .75rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-row.cols2 {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .form-row.cols3 {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-
-        @media(max-width:500px) {
-
-            .form-row.cols2,
-            .form-row.cols3 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-label {
-            display: block;
-            font-size: .8rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: .4rem;
-        }
-
-        .form-label .req {
-            color: #ef4444;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: .7rem .9rem;
-            border-radius: 10px;
-            border: 2px solid #e5e7eb;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .9rem;
-            color: #111827;
-            background: #fff;
-            transition: border-color .2s, box-shadow .2s;
-            outline: none;
-        }
-
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px #3b82f620;
-        }
-
-        .form-input.readonly-look {
-            background: #f9fafb;
-            color: #6b7280;
-            border-color: #f0f0f3;
-            cursor: default;
-        }
-
-        .form-input::placeholder {
-            color: #9ca3af;
-        }
-
-        textarea.form-input {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-hint {
-            font-size: .7rem;
-            color: #9ca3af;
-            margin-top: 3px;
-        }
-
-        /* KM card com destaque */
-        .km-group {
-            background: #f8fafc;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1rem;
-        }
-
-        .km-group-title {
-            font-size: .75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .06em;
-            color: #9ca3af;
-            margin-bottom: .75rem;
-        }
-
-        .error-text {
-            font-size: .78rem;
-            color: #ef4444;
-            margin-top: .3rem;
-        }
-
-        /* ── DIVIDER ── */
-        .form-divider {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-            margin: 1.25rem 0;
-        }
-
-        .form-divider span {
-            font-size: .75rem;
-            color: #9ca3af;
-            white-space: nowrap;
-        }
-
-        .form-divider::before,
-        .form-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #f0f0f3;
-        }
-
-        /* ── ACTIONS ── */
-        .form-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 1.5rem;
-            gap: .75rem;
-        }
-
-        .form-actions-hint {
-            font-size: .75rem;
-            color: #9ca3af;
-        }
-
-        .btn {
-            padding: .65rem 1.4rem;
-            border-radius: 10px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .875rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            transition: all .18s ease;
-            text-decoration: none;
-        }
-
-        .btn:active {
-            transform: scale(.97);
-        }
-
-        .btn-yellow {
-            background: #f59e0b;
-            color: #fff;
-            box-shadow: 0 2px 8px #f59e0b44;
-        }
-
-        .btn-yellow:hover {
-            background: #d97706;
-        }
-
-        .btn-green {
-            background: #10b981;
-            color: #fff;
-            box-shadow: 0 2px 8px #10b98144;
-        }
-
-        .btn-green:hover {
-            background: #059669;
-        }
-
-        .btn-outline-red {
-            background: transparent;
-            color: #ef4444;
-            border: 1.5px solid #fca5a5;
-        }
-
-        .btn-outline-red:hover {
-            background: #fef2f2;
-        }
-
-        /* ── MOBILE STICKY FOOTER ── */
-        .mobile-footer {
-            position: fixed;
-            inset-x: 0;
-            bottom: 0;
-            z-index: 50;
-            background: rgba(255, 255, 255, .95);
-            backdrop-filter: blur(8px);
-            border-top: 1px solid #e5e7eb;
-            padding: .85rem 1rem env(safe-area-inset-bottom);
-        }
-
-        .mobile-footer-inner {
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex;
             gap: .6rem;
         }
 
-        .btn-mobile {
+        .divider::before,
+        .divider::after {
+            content: '';
             flex: 1;
-            padding: .85rem;
-            border-radius: 12px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: .9rem;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            display: block;
-            transition: all .18s;
+            height: 1px;
+            background: #e5e7eb;
         }
 
-        .btn-mobile:active {
-            transform: scale(.97);
+        #errorMsg:not(:empty) {
+            margin-top: .5rem;
+            padding: .55rem .9rem;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: .5rem;
+            font-size: .82rem;
+            color: #b91c1c;
         }
 
-        .btn-mobile.yellow {
-            background: #f59e0b;
-            color: #fff;
-            box-shadow: 0 2px 12px #f59e0b55;
-        }
-
-        .btn-mobile.green {
-            background: #10b981;
-            color: #fff;
-            box-shadow: 0 2px 12px #10b98155;
-        }
-
-        .btn-mobile.outline-red {
-            background: transparent;
-            color: #ef4444;
-            border: 1.5px solid #fca5a5;
+        @media(max-width:639px) {
+            .desktop-actions {
+                display: none !important;
+            }
         }
 
         @media(min-width:640px) {
             .mobile-footer {
-                display: none;
+                display: none !important;
             }
         }
 
-        @media(max-width:639px) {
-            .form-actions {
-                display: none;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
             }
 
-            .mov-root {
-                padding-bottom: 8rem;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        /* error msg */
-        #errorMsg:not(:empty) {
-            background: #fef2f2;
-            border: 1px solid #fca5a5;
-            border-radius: 8px;
-            padding: .6rem .9rem;
-            font-size: .82rem;
-            color: #b91c1c;
-            margin-top: .5rem;
-        }
-
-        .input-error {
-            border: 1px solid #ef4444;
-            background-color: #fef2f2;
-        }
-
-        /* Para manter o foco também com borda vermelha */
-        .input-error:focus {
-            border-color: #dc2626;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        #movCard {
+            animation: slideUp .38s cubic-bezier(.22, 1, .36, 1) both;
         }
     </style>
 
-    <div class="mov-root">
-        <div class="mov-card">
+    <div
+        class="font-nunito min-h-screen bg-gray-100 flex flex-col items-center
+            px-3 pt-4 pb-32 sm:pb-10 sm:pt-8 mt-7">
+
+        <div id="movCard" class="w-full max-w-lg bg-white rounded-2xl shadow-lg overflow-hidden">
 
             {{-- ── HEADER ── --}}
-            <div class="mov-header">
-                <div class="mov-header-top">
-                    <div class="mov-avatar {{ $isStarting ? 'yellow' : 'green' }}">
+            <div class="{{ $isStarting ? 'bg-amber-50' : 'bg-emerald-50' }} px-5 pt-5 pb-4 border-b border-gray-100">
+
+                <div class="flex items-center gap-3 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0
+                    {{ $isStarting ? 'bg-amber-100' : 'bg-emerald-100' }}">
                         {{ $isStarting ? '🚗' : '📦' }}
                     </div>
-                    <div style="flex:1">
-                        <h1 class="mov-title">{{ $isStarting ? 'Saída de Veículo' : 'Entrega de Veículo' }}</h1>
-                        <p class="mov-meta">
-                            Motorista — <span>{{ Auth::user()->name }}</span> &nbsp;·&nbsp;
-                            {{ $veiculos->first()->marca ?? '' }} {{ $veiculos->first()->modelo ?? '' }}
+                    <div class="flex-1 min-w-0">
+                        <h1 class="font-sora text-base font-bold text-gray-900 leading-tight">
+                            {{ $isStarting ? 'Saída de Veículo' : 'Entrega de Veículo' }}
+                        </h1>
+                        <p class="text-xs text-gray-500 mt-0.5 truncate">
+                            {{ Auth::user()->name }}
+                            @if ($veiculo)
+                                &nbsp;·&nbsp; {{ $veiculo->marca ?? '' }} {{ $veiculo->modelo ?? '' }}
+                            @endif
                         </p>
                     </div>
-                    <span class="mov-badge {{ $isStarting ? 'yellow' : 'green' }}">
+                    <span
+                        class="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold
+                     {{ $isStarting ? 'bg-amber-200 text-amber-900' : 'bg-emerald-200 text-emerald-900' }}">
                         {{ $isStarting ? '🟡 Saindo' : '🟢 Entregando' }}
                     </span>
                 </div>
 
-                {{-- ── TIMELINE ── --}}
-                <div class="timeline-wrap">
-                    <div class="timeline">
-                        <div class="timeline-track">
-                            <div class="timeline-fill step{{ $step }}"></div>
-                        </div>
-
-                        {{-- Nó 1: Aguardando --}}
-                        <div class="tl-node">
-                            <div class="tl-dot {{ $step >= 1 ? 'done' : 'active' }}">
-                                {{ $step >= 1 ? '✓' : '🏁' }}
-                            </div>
-                            <div class="tl-label {{ $step == 0 ? 'active' : 'done' }}">Saída</div>
-                            @if (!$isStarting)
-                                <div class="tl-time">{{ $movimentacao->first()->created_at?->format('H:i') ?? '' }}</div>
-                            @endif
-                        </div>
-
-                        {{-- Nó 2: Em Corrida --}}
-                        <div class="tl-node">
-                            <div class="tl-dot {{ $step == 0 ? 'pending' : ($step == 1 ? 'active' : 'done') }}">
-                                {{ $step == 0 ? '🛣️' : ($step == 1 ? '🛣️' : '✓') }}
-                            </div>
-                            <div class="tl-label {{ $step == 1 ? 'active' : ($step > 1 ? 'done' : '') }}">Em Corrida</div>
-                            @if (!$isStarting)
-                                <div class="tl-time">Agora</div>
-                            @endif
-                        </div>
-
-                        {{-- Nó 3: Finalizado --}}
-                        <div class="tl-node">
-                            <div class="tl-dot {{ $step == 2 ? 'done' : 'pending' }}">
-                                {{ $step == 2 ? '✓' : '🏆' }}
-                            </div>
-                            <div class="tl-label {{ $step == 2 ? 'done' : '' }}">Chegada</div>
-                            @if ($step == 2)
-                                <div class="tl-time">{{ now()->format('H:i') }}</div>
-                            @endif
-                        </div>
+                {{-- Timeline --}}
+                <div class="relative flex items-start pt-1">
+                    <div class="absolute left-4 right-4 h-1 bg-gray-200 rounded-full" style="top:18px">
+                        <div class="tl-fill tl-fill-{{ $step }}"></div>
                     </div>
 
-                    <p class="timeline-hint">
-                        {{ $isStarting
-                            ? 'Preencha os dados e clique em Iniciar Corrida para registrar a saída.'
-                            : 'Informe o KM final e conclua a corrida para registrar a chegada.' }}
-                    </p>
+                    {{-- Nó 1 --}}
+                    <div class="flex-1 flex flex-col items-center relative z-10">
+                        <div
+                            class="w-9 h-9 rounded-full border-4 flex items-center justify-center text-sm font-extrabold
+                      {{ $step >= 1
+                          ? 'border-emerald-500 bg-emerald-100 text-emerald-700'
+                          : 'border-amber-400 bg-white text-amber-600 ring-amber' }}">
+                            {{ $step >= 1 ? '✓' : '1' }}
+                        </div>
+                        <span
+                            class="mt-1.5 text-center text-[10px] font-extrabold uppercase tracking-wider
+                       {{ $step == 0 ? 'text-amber-600' : 'text-emerald-600' }}">Saída</span>
+                        @if (!$isStarting)
+                            <span
+                                class="text-[10px] text-gray-400">{{ $movimentacao->first()->created_at?->format('H:i') ?? '' }}</span>
+                        @endif
+                    </div>
+
+                    {{-- Nó 2 --}}
+                    <div class="flex-1 flex flex-col items-center relative z-10">
+                        <div
+                            class="w-9 h-9 rounded-full border-4 flex items-center justify-center text-sm font-extrabold
+                      {{ $step == 0
+                          ? 'border-gray-200 bg-white text-gray-300'
+                          : ($step == 1
+                              ? 'border-amber-400 bg-white text-amber-600 ring-amber'
+                              : 'border-emerald-500 bg-emerald-100 text-emerald-700') }}">
+                            {{ $step == 2 ? '✓' : '2' }}
+                        </div>
+                        <span
+                            class="mt-1.5 text-center text-[10px] font-extrabold uppercase tracking-wider
+                       {{ $step == 0 ? 'text-gray-300' : ($step == 1 ? 'text-amber-600' : 'text-emerald-600') }}">
+                            Corrida
+                        </span>
+                        @if (!$isStarting)
+                            <span class="text-[10px] text-gray-400">Agora</span>
+                        @endif
+                    </div>
+
+                    {{-- Nó 3 --}}
+                    <div class="flex-1 flex flex-col items-center relative z-10">
+                        <div
+                            class="w-9 h-9 rounded-full border-4 flex items-center justify-center text-sm font-extrabold
+                      {{ $step == 2 ? 'border-emerald-500 bg-emerald-100 text-emerald-700' : 'border-gray-200 bg-white text-gray-300' }}">
+                            {{ $step == 2 ? '✓' : '3' }}
+                        </div>
+                        <span
+                            class="mt-1.5 text-center text-[10px] font-extrabold uppercase tracking-wider
+                       {{ $step == 2 ? 'text-emerald-600' : 'text-gray-300' }}">Chegada</span>
+                        @if ($step == 2)
+                            <span class="text-[10px] text-gray-400">{{ now()->format('H:i') }}</span>
+                        @endif
+                    </div>
                 </div>
+
+                <p class="text-center text-xs text-gray-500 mt-4 px-1 leading-relaxed">
+                    {{ $isStarting
+                        ? 'Preencha os dados abaixo e toque em Iniciar Corrida.'
+                        : 'Informe o KM final e toque em Concluir Corrida.' }}
+                </p>
             </div>
 
             {{-- ── FORM ── --}}
-            <form id="movForm" method="POST"
+            <form id="movForm" method="POST" novalidate
                 @if ($movimentacao->isEmpty()) action="{{ route('movimentacao.store') }}"
-            @else
-                action="{{ route('movimentacao.update', $movimentacao->first()->id) }}" @endif
-                class="mov-form" novalidate>
+      @else action="{{ route('movimentacao.update', $movimentacao->first()->id) }}" @endif
+                class="px-5 py-5 space-y-5">
                 @csrf
 
-                {{-- Campos ocultos: data, hora, status, veiculo, motorista, combustivel --}}
                 @if ($movimentacao->isEmpty())
                     <input type="hidden" name="data" value="{{ old('data', date('Y-m-d')) }}">
                     <input type="hidden" name="hora" value="{{ old('hora', date('H:i')) }}">
@@ -602,14 +238,13 @@
                         @foreach ($veiculos as $v)
                             <option selected value="{{ $v->id }}" data-combustivel="{{ $v->combustivel }}"
                                 data-km="{{ $v->km_atual }}">
-                                {{ $v->placa }} - {{ $v->modelo }}
+                                {{ $v->placa }} – {{ $v->modelo }}
                             </option>
                         @endforeach
                     @else
                         <option selected value="{{ $movimentacao->first()->veiculo_id }}"
                             data-combustivel="{{ $movimentacao->first()->veiculo->combustivel }}"
-                            data-km="{{ $movimentacao->first()->veiculo->km_atual }}">
-                        </option>
+                            data-km="{{ $movimentacao->first()->veiculo->km_atual }}"></option>
                     @endif
                 </select>
 
@@ -625,96 +260,130 @@
                 <input id="tipo_combustivel" name="tipo_combustivel" type="hidden"
                     value="{{ old('tipo_combustivel') ?? ($movimentacao->first()->tipo_combustivel ?? '') }}">
 
-                {{-- ── KM GROUP ── --}}
-                <div class="km-group">
-                    <div class="km-group-title">Quilometragem</div>
-                    <div class="form-row {{ $isStarting ? '' : 'cols2' }}">
+                {{-- ── KM ── --}}
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <p class="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">📏 Quilometragem</p>
 
-                        {{-- KM Inicial --}}
+                    <div class="grid {{ $isStarting ? 'grid-cols-1' : 'grid-cols-2' }} gap-3">
                         <div>
-                            <label class="form-label" for="km_inicial">KM Inicial <span class="req">*</span></label>
+                            <label class="block text-xs font-bold text-gray-600 mb-1" for="km_inicial">
+                                KM Inicial <span class="text-red-500">*</span>
+                            </label>
                             @if ($movimentacao->isEmpty())
-                                <input name="km_inicial" id="km_inicial" inputmode="decimal" type="number" step="0.1"
-                                    value="{{ old('km_inicial') }}" placeholder="Ex: 12345.5" class="form-input" required>
-                                <p class="form-hint">Leia o hodômetro antes de sair</p>
+                                <input id="km_inicial" name="km_inicial" type="number" inputmode="decimal" step="0.1"
+                                    value="{{ old('km_inicial') }}" placeholder="Ex: 12345"
+                                    class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all"
+                                    required>
+                                <p class="text-xs text-gray-400 mt-1">Leia o hodômetro antes de sair</p>
                             @else
-                                <input name="km_inicial" id="km_inicial" inputmode="decimal" type="number" step="0.1"
+                                <input id="km_inicial" name="km_inicial" type="number" inputmode="decimal" step="0.1"
                                     value="{{ old('km_inicial') ?? ($movimentacao->first()->km_inicial ?? 0) }}"
-                                    class="form-input readonly-look" readonly>
+                                    class="w-full rounded-lg border-2 border-gray-100 bg-gray-100 px-3 py-2.5 text-sm text-gray-400 cursor-not-allowed"
+                                    readonly>
                             @endif
                         </div>
 
-                        {{-- KM Final (só no modo entregando) --}}
                         @if (!$movimentacao->isEmpty())
                             <div>
-                                <label class="form-label" for="km_final">KM Final <span class="req">*</span></label>
-                                <input name="km_final" id="km_final" inputmode="decimal" type="number" step="0.1"
-                                    placeholder="Ex: 12400" value="{{ old('km_final') ?? '' }}"
-                                    class="form-input @error('km_final') input-error @enderror" required>
+                                <label class="block text-xs font-bold text-gray-600 mb-1" for="km_final">
+                                    KM Final <span class="text-red-500">*</span>
+                                </label>
+                                <input id="km_final" name="km_final" type="number" inputmode="decimal" step="0.1"
+                                    value="{{ old('km_final') ?? '' }}" placeholder="Ex: 12400"
+                                    class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all @error('km_final') field-error @enderror"
+                                    required>
                             </div>
                         @else
-                            <input name="km_final" id="km_final" type="number" step="0.1" disabled hidden>
+                            <input id="km_final" name="km_final" type="number" step="0.1" disabled hidden>
                         @endif
-
                     </div>
 
-                    {{-- KM Rodado (oculto mas enviado) --}}
-                    <input name="km_rodado" id="km_rodado" type="hidden" value="{{ old('km_rodado', '0.0') }}">
+                    <input id="km_rodado" name="km_rodado" type="hidden" value="{{ old('km_rodado', '0.0') }}">
 
-                    {{-- Preview KM rodado (só no modo entregando) --}}
                     @if (!$movimentacao->isEmpty())
-                        <div id="kmRodadoPreview"
-                            style="margin-top:.5rem; font-size:.82rem; color:#6b7280; display:flex; align-items:center; gap:.4rem;">
+                        <div id="kmRodadoPreview" class="mt-2.5 flex items-center gap-2 text-xs text-gray-500">
                             <span>🛣️ KM Rodado:</span>
-                            <strong id="kmRodadoVal" style="color:#111827">—</strong>
+                            <strong id="kmRodadoVal" class="text-gray-800">—</strong>
                         </div>
                     @endif
                 </div>
 
-                {{-- ── ORIGEM / DESTINO ── --}}
-                <div class="form-divider"><span>Rota</span></div>
-
-                <div class="form-row cols2">
-                    <div>
-                        <label class="form-label" for="origem">Origem <span class="req">*</span></label>
-                        <input name="origem" id="origem" type="text"
-                            value="{{ old('origem') ?? ($movimentacao->first()->origem ?? '') }}" placeholder="Ex: Sama"
-                            class="form-input" required>
-                        @error('origem')
-                            <p class="error-text">{{ $message }}</p>
-                        @enderror
+                {{-- ── ROTA ── --}}
+                <div>
+                    <div class="divider mb-3">
+                        <span
+                            class="text-xs font-extrabold uppercase tracking-widest text-gray-400 px-1 whitespace-nowrap">
+                            📍 Rota
+                        </span>
                     </div>
-                    <div>
-                        <label class="form-label" for="destino">Destino <span class="req">*</span></label>
-                        <input name="destino" id="destino" type="text"
-                            value="{{ old('destino') ?? ($movimentacao->first()->destino ?? '') }}"
-                            placeholder="Ex: Paço" class="form-input" required>
-                        @error('destino')
-                            <p class="error-text">{{ $message }}</p>
-                        @enderror
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1" for="origem">
+                                Origem <span class="text-red-500">*</span>
+                            </label>
+                            <input id="origem" name="origem" type="text"
+                                value="{{ old('origem') ?? ($movimentacao->first()->origem ?? '') }}"
+                                placeholder="Ex: Sama"
+                                class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all"
+                                required>
+                            @error('origem')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1" for="destino">
+                                Destino <span class="text-red-500">*</span>
+                            </label>
+                            <input id="destino" name="destino" type="text"
+                                value="{{ old('destino') ?? ($movimentacao->first()->destino ?? '') }}"
+                                placeholder="Ex: Paço"
+                                class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all"
+                                required>
+                            @error('destino')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 
                 {{-- ── OBSERVAÇÕES ── --}}
-                <div class="form-divider"><span>Observações</span></div>
-                <textarea name="observacao" id="observacoes" rows="3" class="form-input"
-                    placeholder="Opcional — informe qualquer dado relevante">{{ old('observacoes') ?? ($movimentacao->first()->observacoes ?? '') }}</textarea>
+                <div>
+                    <div class="divider mb-3">
+                        <span
+                            class="text-xs font-extrabold uppercase tracking-widest text-gray-400 px-1 whitespace-nowrap">
+                            📝 Observações
+                        </span>
+                    </div>
+                    <textarea id="observacoes" name="observacao" rows="3" placeholder="Opcional — informe qualquer dado relevante"
+                        class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all resize-none">{{ old('observacoes') ?? ($movimentacao->first()->observacoes ?? '') }}</textarea>
+                </div>
 
-                <div id="errorMsg" role="alert" aria-live="polite" style="margin-top:.5rem;"></div>
+                <div id="errorMsg" role="alert" aria-live="polite"></div>
 
                 {{-- ── DESKTOP ACTIONS ── --}}
-                <div class="form-actions">
-                    <span class="form-actions-hint">Campos com <span style="color:#ef4444">*</span> são
-                        obrigatórios</span>
-                    <div style="display:flex;gap:.6rem;align-items:center;">
+                <div class="desktop-actions flex items-center justify-between pt-1 gap-3">
+                    <p class="text-xs text-gray-400"><span class="text-red-400">*</span> campos obrigatórios</p>
+                    <div class="flex items-center gap-2">
                         @if (!$movimentacao->isEmpty())
                             <a href="{{ route('movimentacao.cancelar', ['id' => $movimentacao->first()->id, 'veiculoId' => $movimentacao->first()->veiculo_id]) }}"
-                                class="btn btn-outline-red">Cancelar</a>
+                                class="px-4 py-2 rounded-lg border border-red-300 text-red-500 text-sm font-bold hover:bg-red-50 transition-all">
+                                Cancelar
+                            </a>
                         @endif
                         @if ($movimentacao->isEmpty())
-                            <button type="submit" class="btn btn-yellow">🚗 Iniciar Corrida</button>
+                            <button type="submit"
+                                class="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-white text-sm font-bold
+                     shadow-md shadow-amber-200 transition-all active:scale-95 border-none cursor-pointer"
+                                style="background-color: #f97316; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.35);">
+                                🚗 Iniciar Corrida
+                            </button>
                         @else
-                            <button type="submit" class="btn btn-green">🏁 Concluir Corrida</button>
+                            <button type="submit"
+                                class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold
+                     shadow-md shadow-emerald-200 transition-all active:scale-95 border-none cursor-pointer"
+                                style="background-color: #f97316; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.35);">
+                                🏁 Concluir Corrida
+                            </button>
                         @endif
                     </div>
                 </div>
@@ -723,88 +392,107 @@
         </div>
     </div>
 
-    {{-- ── MOBILE STICKY FOOTER ── --}}
-    <div class="mobile-footer">
-        <div class="mobile-footer-inner">
+    {{-- ── MOBILE FOOTER ── --}}
+    <div class="mobile-footer fixed inset-x-0 bottom-0 z-50 bg-white bg-opacity-95 border-t border-gray-200 px-4 py-3"
+        style="padding-bottom: max(.75rem, env(safe-area-inset-bottom))">
+
+        <div class="flex gap-2.5 max-w-lg mx-auto">
+
             @if (!$movimentacao->isEmpty())
                 <a href="{{ route('movimentacao.cancelar', ['id' => $movimentacao->first()->id, 'veiculoId' => $movimentacao->first()->veiculo_id]) }}"
-                    class="btn-mobile outline-red">Cancelar</a>
+                    class="flex-1 text-center py-3.5 rounded-xl border border-red-300 text-red-500 text-sm font-bold transition-all active:scale-95">
+                    ✕ Cancelar
+                </a>
             @endif
+
             @if ($movimentacao->isEmpty())
-                <button class="btn-mobile yellow" onclick="document.getElementById('movForm').submit()">
+                <button onclick="document.getElementById('movForm').submit()"
+                    class="flex-1 py-3.5 rounded-xl text-white text-sm font-bold
+           shadow-lg transition-all active:scale-95 border-none cursor-pointer"
+                    style="background-color: #f97316; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.35);">
                     🚗 Iniciar Corrida
                 </button>
             @else
-                <button class="btn-mobile green" onclick="document.getElementById('movForm').submit()">
+                <button onclick="document.getElementById('movForm').submit()"
+                    class="flex-1 py-3.5 rounded-xl bg-orange-500 text-white text-sm font-bold
+               shadow-lg shadow-orange-200 transition-all active:scale-95 border-none cursor-pointer"
+                    style="background-color: #f97316; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.35);">
                     🏁 Concluir Corrida
                 </button>
             @endif
+
         </div>
     </div>
 
-@endsection
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
 
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selVeiculo = document.getElementById('veiculo_id');
-            const kmInicialField = document.getElementById('km_inicial');
-            const tipoField = document.getElementById('tipo_combustivel');
-            const kmFinal = document.getElementById('km_final');
-            const kmRodado = document.getElementById('km_rodado');
-            const kmRodadoVal = document.getElementById('kmRodadoVal');
-            const errorMsg = document.getElementById('errorMsg');
+                /* scroll centralizado no card ao carregar */
+                var card = document.getElementById('movCard');
+                if (card) {
+                    setTimeout(function() {
+                        card.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }, 150);
+                }
 
-            // ── Preenche KM e combustível a partir do veículo selecionado ──
-            function applySelectedVehicle(opt) {
-                if (!opt) return;
-                const km = opt.getAttribute('data-km') || '';
-                const combustivel = opt.getAttribute('data-combustivel') || '';
-                if (kmInicialField && km !== '') kmInicialField.value = km;
-                if (tipoField) tipoField.value = combustivel;
+                var selVeiculo = document.getElementById('veiculo_id');
+                var kmInicialFld = document.getElementById('km_inicial');
+                var tipoFld = document.getElementById('tipo_combustivel');
+                var kmFinalFld = document.getElementById('km_final');
+                var kmRodadoFld = document.getElementById('km_rodado');
+                var kmRodadoVal = document.getElementById('kmRodadoVal');
+                var errorMsg = document.getElementById('errorMsg');
+
+                function applyVehicle(opt) {
+                    if (!opt) return;
+                    var km = opt.getAttribute('data-km') || '';
+                    var comb = opt.getAttribute('data-combustivel') || '';
+                    if (kmInicialFld && km) kmInicialFld.value = km;
+                    if (tipoFld && comb) tipoFld.value = comb;
+                    recalc();
+                }
+
+                if (selVeiculo) {
+                    selVeiculo.addEventListener('change', function() {
+                        applyVehicle(this.options[this.selectedIndex]);
+                    });
+                    applyVehicle(selVeiculo.querySelector('option[selected]') || selVeiculo.options[0]);
+                }
+
+                function recalc() {
+                    if (!kmInicialFld || !kmFinalFld || !kmRodadoFld) return;
+                    var a = parseFloat(kmInicialFld.value);
+                    var b = parseFloat(kmFinalFld.value);
+
+                    if (!kmFinalFld.value || isNaN(b)) {
+                        kmRodadoFld.value = '0.0';
+                        if (kmRodadoVal) kmRodadoVal.textContent = '—';
+                        if (errorMsg) errorMsg.textContent = '';
+                        return;
+                    }
+                    if (isNaN(a)) {
+                        if (errorMsg) errorMsg.textContent = 'Informe um KM inicial válido.';
+                        return;
+                    }
+                    var diff = b - a;
+                    if (diff < 0) {
+                        kmRodadoFld.value = '';
+                        if (kmRodadoVal) kmRodadoVal.textContent = '⚠️ inválido';
+                        if (errorMsg) errorMsg.textContent = 'KM Final não pode ser menor que KM Inicial.';
+                    } else {
+                        kmRodadoFld.value = diff.toFixed(1);
+                        if (kmRodadoVal) kmRodadoVal.textContent = diff.toFixed(1) + ' km';
+                        if (errorMsg) errorMsg.textContent = '';
+                    }
+                }
+
+                if (kmInicialFld) kmInicialFld.addEventListener('input', recalc);
+                if (kmFinalFld) kmFinalFld.addEventListener('input', recalc);
                 recalc();
-            }
-
-            if (selVeiculo) {
-                selVeiculo.addEventListener('change', function() {
-                    applySelectedVehicle(this.options[this.selectedIndex]);
-                });
-                // aplica na carga inicial
-                const initOpt = selVeiculo.querySelector('option[selected]') || selVeiculo.options[0];
-                applySelectedVehicle(initOpt);
-            }
-
-            // ── Recalcula KM rodado ──
-            function recalc() {
-                if (!kmInicialField || !kmFinal || !kmRodado) return;
-                const a = parseFloat(kmInicialField.value);
-                const b = parseFloat(kmFinal.value);
-
-                if (!kmFinal.value || isNaN(b)) {
-                    kmRodado.value = '0.0';
-                    if (kmRodadoVal) kmRodadoVal.textContent = '—';
-                    if (errorMsg) errorMsg.textContent = '';
-                    return;
-                }
-                if (isNaN(a)) {
-                    if (errorMsg) errorMsg.textContent = 'Informe um KM inicial válido.';
-                    return;
-                }
-                const diff = b - a;
-                if (diff < 0) {
-                    kmRodado.value = '';
-                    if (kmRodadoVal) kmRodadoVal.textContent = '⚠️ inválido';
-                    if (errorMsg) errorMsg.textContent = 'KM Final não pode ser menor que KM Inicial.';
-                } else {
-                    kmRodado.value = diff.toFixed(1);
-                    if (kmRodadoVal) kmRodadoVal.textContent = diff.toFixed(1) + ' km';
-                    if (errorMsg) errorMsg.textContent = '';
-                }
-            }
-
-            if (kmInicialField) kmInicialField.addEventListener('input', recalc);
-            if (kmFinal) kmFinal.addEventListener('input', recalc);
-            recalc();
-        });
-    </script>
-@endpush
+            });
+        </script>
+    @endpush
