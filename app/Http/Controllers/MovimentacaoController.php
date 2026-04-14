@@ -28,7 +28,7 @@ class MovimentacaoController extends Controller
      */
     public function index()
     {
-        
+
         $veiculos = Veiculo::all();
         $user = Auth::user();
         $movimentacao = Movimentacao::where('status', 'ativa')
@@ -60,20 +60,43 @@ class MovimentacaoController extends Controller
      */
     public function list(Request $request)
     {
-        $pesquisa = $request->get('pesquisa');
+        $pesquisa = $request->query('pesquisa');
+        $secretaria_id = $request->query('secretaria_id');
+        $dataInicial = $request->query('data_inicial');
+        $dataFinal = $request->query('data_final');
+
         $veiculos = Veiculo::orderBy('placa')->get();
         $users = User::orderBy('name')->get();
-        $secretaria_id = $request->get('secretaria_id');
-        $dataInicial = $request->get('data_inicial');
-        $dataFinal = $request->get('data_final');
         $secretarias = Secretaria::orderBy('nome')->get();
-        if (isset($pesquisa) and isset($secretaria_id)) {
-            $movimentacoes = Movimentacao::with('veiculo', 'user')->paginate(10);
+
+        $temFiltro =
+            filled($pesquisa) ||
+            filled($secretaria_id) ||
+            filled($dataInicial) ||
+            filled($dataFinal);
+
+        if ($temFiltro) {
+            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id, $dataInicial, $dataFinal)
+                ->orderByDesc('id')
+                ->paginate(10)
+                ->withQueryString();
         } else {
-            $pesquisa = request()->get('pesquisa');
-            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id, $dataInicial, $dataFinal)->paginate(10);
+            $movimentacoes = Movimentacao::with('veiculo', 'user')
+                ->orderByDesc('id')
+                ->paginate(10)
+                ->withQueryString();
         }
-        return view('movimentacao.lista', compact('veiculos', 'users', 'movimentacoes', 'secretarias', 'pesquisa', 'secretaria_id'));
+
+        return view('movimentacao.lista', compact(
+            'veiculos',
+            'users',
+            'movimentacoes',
+            'secretarias',
+            'pesquisa',
+            'secretaria_id',
+            'dataInicial',
+            'dataFinal'
+        ));
     }
 
     public function sucesso(Request $request)
@@ -132,7 +155,7 @@ class MovimentacaoController extends Controller
                 ->orderByDesc('hora')
                 ->get();
         } else {
-            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id)->get();
+            $movimentacoes = $this->pesquisa($pesquisa, $secretaria_id, $dataInicial, $dataFinal)->get();
         }
 
         $totalKm = $movimentacoes->sum(function ($m) {
