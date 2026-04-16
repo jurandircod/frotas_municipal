@@ -355,7 +355,8 @@
                         </span>
                     </div>
                     <textarea id="observacoes" name="observacao" rows="3" placeholder="Opcional — informe qualquer dado relevante"
-                        class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all resize-none">{{ old('observacoes') ?? ($movimentacao->first()->observacoes ?? '') }}</textarea>
+                        class="field w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 transition-all resize-none">{{ old('observacoes') ?? ($movimentacao->first()->observacao ?? '') }}</textarea>
+
                 </div>
 
                 <div id="errorMsg" role="alert" aria-live="polite"></div>

@@ -16,6 +16,9 @@ Route::get('/', function () {
 
 require __DIR__ . '/auth.php';
 
+
+
+
 Route::middleware(['auth'])->group(function () {
     /*
      * Rotas que AMBOS (role 1 e role 2) podem acessar:
