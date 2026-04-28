@@ -78,7 +78,7 @@
                         </a>
 
                         <x-primary-button class="inline-flex items-center justify-center px-6 py-2">
-                            {{ __('Cadatrar') }}
+                            {{ __('Cadastrar') }}
                         </x-primary-button>
                     </div>
                 </form>

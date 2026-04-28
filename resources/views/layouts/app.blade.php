@@ -15,7 +15,6 @@
     <meta name="apple-mobile-web-app-title" content="Movimentação">
 
     <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
-    <link rel="manifest" href="{{asset('manifest.json')}}">
     {{-- Tailwind CDN --}}
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
