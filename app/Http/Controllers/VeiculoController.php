@@ -8,6 +8,7 @@ use App\Models\Veiculo;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
 
 class VeiculoController extends Controller
 {
@@ -21,16 +22,47 @@ class VeiculoController extends Controller
         return view('veiculo.veiculo', compact('tipoVeiculos'));
     }
 
+
+    public function gerarQrCode(Veiculo $veiculo)
+    {
+        if ($veiculo->veiculo_qr_code && Storage::disk('public')->exists($veiculo->veiculo_qr_code)) {
+            return back()->with('info', 'Esse veículo já possui QR Code.');
+        }
+
+        $veiculo->gerarQrCode();
+
+        return back()->with('success', 'QR Code gerado com sucesso!');
+    }
+
+    public function regenerarQrCode(Veiculo $veiculo)
+    {
+        $veiculo->gerarQrCode();
+
+        return back()->with('success', 'QR Code recriado com sucesso!');
+    }
     /**
      * Cadastrar novo veículo.
      */
     public function store(Request $request)
     {
-        $this->validateRequest($request);
+
+
         try {
-            Veiculo::create($request->all());
+            $this->validateRequest($request);
+            Veiculo::create($request->only([
+                'placa',
+                'marca',
+                'modelo',
+                'ano',
+                'cor',
+                'tipo_veiculo_id',
+                'combustivel',
+                'km_atual',
+                'status',
+            ]));
         } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao cadastrar veículo');
+            dd($e->getMessage());
+            return back()->with('error', $e->getMessage());
         }
 
         return back()->with('success', 'Veículo cadastrado com sucesso!');
@@ -106,13 +138,12 @@ class VeiculoController extends Controller
      */
     protected function validateRequest(Request $request, bool $isUpdate = false): void
     {
-        $currentYear = Carbon::now()->year;
 
         $rules = [
             'placa' => 'required|max:9',
             'marca' => 'required',
             'modelo' => 'required',
-            'ano' => 'required|integer|min:1980|max:' . $currentYear,
+            'ano' => 'required|integer|min:1980',
             'cor' => 'required',
             'tipo_veiculo_id' => 'required',
             'combustivel' => 'required|in:gasolina,etanol,diesel,flex,eletrico',
@@ -132,7 +163,6 @@ class VeiculoController extends Controller
             'ano.required' => 'O ano é obrigatório',
             'ano.integer' => 'O ano deve ser um número inteiro',
             'ano.min' => 'O ano mínimo permitido é 1980',
-            'ano.max' => "O ano não pode ser maior que {$currentYear}",
             'cor.required' => 'A cor é obrigatória',
             'tipo_veiculo_id.required' => 'O tipo de veículo é obrigatório',
             'combustivel.required' => 'O combustível é obrigatório',

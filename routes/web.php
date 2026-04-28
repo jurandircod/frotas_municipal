@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SecretariaController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LogSistemaController;
 
 
 Route::get('/', function () {
@@ -39,15 +40,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/movimentacao/sucesso', [MovimentacaoController::class, 'sucesso'])->name('movimentacao.sucesso');
         Route::get('/movimentacao/fim', [MovimentacaoController::class, 'fim'])->name('movimentacao.fim');
         Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
-        
-        });
-        
+    });
+
     /*
     * Rotas SOMENTE admin (role = 2)
     * Admin continua tendo acesso a tudo (incluindo as rotas acima).
     */
     Route::middleware(['role:2'])->group(function () {
 
+
+        Route::post('/veiculos/{veiculo}/qrcode/gerar', [VeiculoController::class, 'gerarQrCode'])->name('veiculo.qrcode.gerar');
+        Route::post('/veiculos/{veiculo}/qrcode/regerar', [VeiculoController::class, 'regenerarQrCode'])->name('veiculo.qrcode.regerar');
         Route::post('/movimentacao/cancel/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
         Route::post('/movimentacao/destroy/{id}', [MovimentacaoController::class, 'destroy'])->name('movimentacao.destroy');
         Route::get('/movimentacoes/pdf', [MovimentacaoController::class, 'pdf'])->name('movimentacao.pdf');
@@ -81,4 +84,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/secretaria/edit', [SecretariaController::class, 'edit'])->name('secretaria.edit');
         // Dashboard (apenas admin por enquanto)
     });
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/logs', [LogSistemaController::class, 'index'])->name('logs.index');
+    Route::get('/logs/feed', [LogSistemaController::class, 'feed'])->name('logs.feed');
 });

@@ -54,12 +54,12 @@
                                 <input id="remember_me" type="checkbox" checked
                                     class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                                     name="remember">
-                                <span class="ml-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                                <span class="ml-2 text-sm text-gray-600">{{ __('Lembrar de mim') }}</span>
                             </label>
 
                             @if (Route::has('password.request'))
                                 <a class="text-sm text-indigo-600 hover:underline" href="{{ route('password.request') }}">
-                                    {{ __('Forgot your password?') }}
+                                    {{ __('Esqueceu sua senha?') }}
                                 </a>
                             @endif
                         </div>
