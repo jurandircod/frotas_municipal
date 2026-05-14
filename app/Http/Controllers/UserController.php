@@ -58,11 +58,11 @@ class UserController extends Controller
         return view('user.user');
     }
 
-    public function list()
-    {
-        
-        $users = User::all();
-        $secretarias = Secretaria::all();
-        return view('user.lista', compact('users', 'secretarias'));
-    }
+public function list()
+{
+    $users = User::paginate(10); // 10 usuários por página
+    $secretarias = Secretaria::all();
+
+    return view('user.lista', compact('users', 'secretarias'));
+}
 }
