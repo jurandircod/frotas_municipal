@@ -40,6 +40,10 @@ class User extends Authenticatable
         $this->notify(new ResetPasswordNotification($token));
     }
 
+    public function retirada()
+    {
+        return $this->hasMany(Retirada::class, 'user_id');
+    }
     public function secretaria()
     {
         return $this->belongsTo(Secretaria::class);

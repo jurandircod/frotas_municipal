@@ -9,6 +9,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SecretariaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogSistemaController;
+use App\Http\Controllers\Retiradas\CartaoController;
+use App\Http\Controllers\Retiradas\FerramentasController;
+use App\Http\Controllers\Retiradas\RetiradaController;
 
 
 Route::get('/', function () {
@@ -47,8 +50,6 @@ Route::middleware(['auth'])->group(function () {
     * Admin continua tendo acesso a tudo (incluindo as rotas acima).
     */
     Route::middleware(['role:2'])->group(function () {
-
-
         Route::post('/veiculos/{veiculo}/qrcode/gerar', [VeiculoController::class, 'gerarQrCode'])->name('veiculo.qrcode.gerar');
         Route::post('/veiculos/{veiculo}/qrcode/regerar', [VeiculoController::class, 'regenerarQrCode'])->name('veiculo.qrcode.regerar');
         Route::post('/movimentacao/cancel/{id}', [MovimentacaoController::class, 'cancelar'])->name('movimentacao.cancelar');
@@ -83,8 +84,51 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/secretaria/destroy/{id}', [SecretariaController::class, 'destroy'])->name('secretaria.destroy');
         Route::post('/secretaria/edit', [SecretariaController::class, 'edit'])->name('secretaria.edit');
         // Dashboard (apenas admin por enquanto)
+
+        Route::get('/cartao', [CartaoController::class, 'index'])->name('cartao.index');
+        Route::get('/cartao/list', [CartaoController::class, 'list'])->name('cartao.list');
+        Route::post('/cartao/store', [CartaoController::class, 'store'])->name('cartao.store');
+        Route::post('/cartao/update', [CartaoController::class, 'update'])->name('cartao.update');
+        Route::post('/cartao/destroy', [CartaoController::class, 'destroy'])->name('cartao.destroy');
+
+
+        Route::get('/ferramenta', [FerramentasController::class, 'index'])
+            ->name('ferramenta.index');
+
+        Route::get('/ferramenta/list', [FerramentasController::class, 'list'])
+            ->name('ferramenta.list');
+
+        Route::post('/ferramenta/store', [FerramentasController::class, 'store'])
+            ->name('ferramenta.store');
+
+        Route::put('/ferramenta/update/{id}', [FerramentasController::class, 'update'])
+            ->name('ferramenta.update');
+
+        Route::delete('/ferramenta/destroy/{id}', [FerramentasController::class, 'destroy'])
+            ->name('ferramenta.destroy');
+        Route::prefix('retirada')->name('retirada.')->controller(RetiradaController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/list', 'list')->name('list');
+            Route::post('/store', 'store')->name('store');
+
+            Route::put('/cancelar/{id}', 'cancelar')->name('cancelar');
+
+            Route::get('/autorizacao', 'autorizacaoIndex')->name('autorizacao.index');
+            Route::put('/autorizacao/{id}', 'autorizar')->name('autorizacao');
+
+            Route::get('/entrega', 'entregaIndex')->name('entrega.index');
+            Route::put('/entregar/{id}', 'pedirEntrega')->name('entregar');
+            Route::put('/cancelar-entrega/{id}', 'pedirCancelamentoEntrega')->name('cancelar.entrega');
+            Route::put('/concluir-entrega/{id}', 'concluirEntrega')->name('concluir');
+
+            Route::get('/{categoria}', 'index')
+                ->where('categoria', 'cartao|ferramenta|generica|chaves')
+                ->name('index.categoria');
+        });
     });
 });
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/logs', [LogSistemaController::class, 'index'])->name('logs.index');

@@ -38,7 +38,6 @@ class SecretariaController extends Controller
     {
         $secretaria = Secretaria::find($request->id);
         $secretaria->update($request->all());
-
         return redirect()->route('secretaria.list')
             ->with('success', 'Secretaria editada com sucesso!');
     }

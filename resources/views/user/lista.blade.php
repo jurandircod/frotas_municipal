@@ -21,6 +21,52 @@
                 </div>
             </div>
 
+            {{-- Filtros --}}
+            <form method="GET" action="{{ route('user.list') }}" class="mt-4 bg-gray-50 border rounded-xl p-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" name="nome" value="{{ request('nome') }}" placeholder="Buscar por nome"
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Secretaria</label>
+                        <select name="secretaria_id"
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm">
+                            <option value="">Todas</option>
+                            @foreach ($secretarias as $s)
+                                <option value="{{ $s->id }}" @selected(request('secretaria_id') == $s->id)>
+                                    {{ $s->nome }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status"
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm">
+                            <option value="">Todos</option>
+                            <option value="ativo" @selected(request('status') == 'ativo')>Ativo</option>
+                            <option value="licença" @selected(request('status') == 'licença')>Licença</option>
+                            <option value="suspenso" @selected(request('status') == 'suspenso')>Suspenso</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <button type="submit"
+                            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm hover:bg-blue-700">
+                            Buscar
+                        </button>
+
+                        <a href="{{ route('user.list') }}"
+                            class="inline-flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300">
+                            Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
             {{-- Table (desktop) --}}
             <div class="mt-4 hidden md:block">
                 <div class="overflow-x-auto">
@@ -62,9 +108,7 @@
                                                 data-categoria="{{ $m->categoria ?? ($m->cnh_categoria ?? '') }}"
                                                 data-validade="{{ $m->validade_cnh ?? $m->cnh_validade }}"
                                                 data-update-route="{{ route('user.store', $m->id) }}"
-                                                data-role="{{ $m->role_id }}"
-                                                data-secretaria="{{ $m->secretaria_id }}"
-                                                >
+                                                data-role="{{ $m->role_id }}" data-secretaria="{{ $m->secretaria_id }}">
                                                 Alterar
                                             </button>
 
@@ -159,7 +203,8 @@
                                 </div>
                                 <div class="col">
                                     <label class="text-sm text-gray-600">Secretarias</label>
-                                    <select name="secretaria_id" id="edit_secretaria_id" class="w-full border rounded-lg px-3 py-2">
+                                    <select name="secretaria_id" id="edit_secretaria_id"
+                                        class="w-full border rounded-lg px-3 py-2">
                                         @foreach ($secretarias as $s)
                                             <option value="{{ $s->id }}">{{ $s->nome }}</option>
                                         @endforeach
