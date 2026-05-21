@@ -210,7 +210,7 @@
                                 class="mt-3"
                             >
                                 @csrf
-                                @method('DELETE')
+                                @method('PUT')
 
                                 <button
                                     type="submit"

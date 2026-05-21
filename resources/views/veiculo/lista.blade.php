@@ -4,7 +4,7 @@
 @section('title', 'Veículos')
 @section('page_header', 'Veículos')
 @section('page_actions')
-    <a href="{{ route('veiculo.store') }}"
+    <a href="{{ route('veiculo.index') }}"
         class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm">
         Cadastrar Veículo
     </a>

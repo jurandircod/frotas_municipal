@@ -88,36 +88,45 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cartao', [CartaoController::class, 'index'])->name('cartao.index');
         Route::get('/cartao/list', [CartaoController::class, 'list'])->name('cartao.list');
         Route::post('/cartao/store', [CartaoController::class, 'store'])->name('cartao.store');
-        Route::post('/cartao/update', [CartaoController::class, 'update'])->name('cartao.update');
+        Route::put('/cartao/update/{id}', [CartaoController::class, 'update'])->name('cartao.update');
         Route::post('/cartao/destroy', [CartaoController::class, 'destroy'])->name('cartao.destroy');
-
+        Route::post('/cartoes/{cartao}/qrcode/gerar', [CartaoController::class, 'gerarQrCode'])
+            ->name('cartao.qrcode.gerar');
+        Route::post('/cartoes/{cartao}/qrcode/regerar', [CartaoController::class, 'regenerarQrCode'])
+            ->name('cartao.qrcode.regerar');
+        Route::get('/cartoes/{cartao}', [CartaoController::class, 'show'])
+            ->name('cartao.show');
 
         Route::get('/ferramenta', [FerramentasController::class, 'index'])
             ->name('ferramenta.index');
-
         Route::get('/ferramenta/list', [FerramentasController::class, 'list'])
             ->name('ferramenta.list');
-
         Route::post('/ferramenta/store', [FerramentasController::class, 'store'])
             ->name('ferramenta.store');
-
         Route::put('/ferramenta/update/{id}', [FerramentasController::class, 'update'])
             ->name('ferramenta.update');
-
         Route::delete('/ferramenta/destroy/{id}', [FerramentasController::class, 'destroy'])
             ->name('ferramenta.destroy');
+
+        Route::post('/cartoes/{cartao}/qrcode/retirada', [CartaoController::class, 'gerarQrCodeRetirada'])
+            ->name('cartao.qrcode.retirada.gerar');
+
+        Route::post('/cartoes/{cartao}/qrcode/entrega', [CartaoController::class, 'gerarQrCodeEntrega'])
+            ->name('cartao.qrcode.entrega.gerar');
+            
         Route::prefix('retirada')->name('retirada.')->controller(RetiradaController::class)->group(function () {
+
+            Route::get('/cartao/{id}', [RetiradaController::class, 'retiradaAutomaticaCartao'])->name('cartao.retirada.automatico');
+            Route::get('/entrega/cartao/{id}', [RetiradaController::class, 'entregaAutomaticaCartao'])->name('cartao.entrega.automatico');
             Route::get('/', 'index')->name('index');
             Route::get('/list', 'list')->name('list');
             Route::post('/store', 'store')->name('store');
-
             Route::put('/cancelar/{id}', 'cancelar')->name('cancelar');
-
             Route::get('/autorizacao', 'autorizacaoIndex')->name('autorizacao.index');
             Route::put('/autorizacao/{id}', 'autorizar')->name('autorizacao');
-
             Route::get('/entrega', 'entregaIndex')->name('entrega.index');
             Route::put('/entregar/{id}', 'pedirEntrega')->name('entregar');
+            Route::put('/deletar/{id}', 'deletarProcesso')->name('deletar');
             Route::put('/cancelar-entrega/{id}', 'pedirCancelamentoEntrega')->name('cancelar.entrega');
             Route::put('/concluir-entrega/{id}', 'concluirEntrega')->name('concluir');
 

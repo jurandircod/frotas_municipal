@@ -26,34 +26,40 @@ class RetiradaController extends Controller
         END
     ";
 
-public function index(Request $request, ?string $categoria = null)
-{
-    return $this->list($request, $categoria);
-}
-
-public function list(Request $request, ?string $categoria = null)
-{
-    if ($categoria === 'generica') {
-        $categoria = 'generico';
+    public function __construct()
+    {
+        // centraliza timezone (mantém o comportamento do original)
+        date_default_timezone_set('America/Sao_Paulo');
+    }
+    
+    public function index(Request $request, ?string $categoria = null)
+    {
+        return $this->list($request, $categoria);
     }
 
-    $cartoes = Cartao::orderBy('nome_veiculo')->get();
-    $ferramentas = Ferramenta::orderBy('nome')->get();
+    public function list(Request $request, ?string $categoria = null)
+    {
+        if ($categoria === 'generica') {
+            $categoria = 'generico';
+        }
 
-    $retiradas = Retirada::with(['user', 'cartao', 'ferramenta'])
-        ->where('user_id', Auth::id())
-        ->where('status', 'pendente')
-        ->latest()
-        ->paginate(1)
-        ->withQueryString();
+        $cartoes = Cartao::orderBy('nome_veiculo')->get();
+        $ferramentas = Ferramenta::orderBy('nome')->get();
 
-    return view('retirada.index', [
-        'cartoes' => $cartoes,
-        'ferramentas' => $ferramentas,
-        'retiradas' => $retiradas,
-        'categoriaPadrao' => $categoria,
-    ]);
-}
+        $retiradas = Retirada::with(['user', 'cartao', 'ferramenta'])
+            ->where('user_id', Auth::id())
+            ->where('status', 'pendente')
+            ->latest()
+            ->paginate(1)
+            ->withQueryString();
+
+        return view('retirada.index', [
+            'cartoes' => $cartoes,
+            'ferramentas' => $ferramentas,
+            'retiradas' => $retiradas,
+            'categoriaPadrao' => $categoria,
+        ]);
+    }
 
     public function cancelar($id)
     {
@@ -80,9 +86,7 @@ public function list(Request $request, ?string $categoria = null)
         if ($retirada->status !== 'retirado' || filled($retirada->entrega_autorizada_por)) {
             return back()->with('error', 'Esse pedido já foi processado e não pode ser cancelado.');
         }
-
         $retirada->update(['status' => 'cancelar entrega']);
-
         return back()->with('success', 'Solicitação de cancelamento enviada com sucesso!');
     }
 
@@ -105,7 +109,14 @@ public function list(Request $request, ?string $categoria = null)
             'nome_generico.max' => 'O nome do item não pode ter mais de 150 caracteres.',
         ]);
 
-        Retirada::create([
+        if (!empty($validated['cartao_id'])) {
+            $cartao = Cartao::findOrFail($validated['cartao_id']);
+            if ($cartao->status == 'em_uso') {
+                return redirect()->route('retirada.list')->with('error', 'Cartão em uso por outra pessoa');
+            }
+        }
+
+        $retirada = Retirada::create([
             'user_id' => Auth::id(),
             'categoria' => $validated['categoria'],
             'cartao_id' => $validated['categoria'] === 'cartao' ? $validated['cartao_id'] : null,
@@ -120,13 +131,17 @@ public function list(Request $request, ?string $categoria = null)
             'datahora_entrega' => null,
         ]);
 
+        if ($retirada->categoria == "cartao") {
+            $aumento = $retirada->cartao->horimetro + $retirada->cartao->aumento_horimetro;
+            $retirada->cartao->horimetro = $aumento;
+            $retirada->update();
+        }
         return redirect()->route('retirada.list')->with('success', 'Solicitação enviada com sucesso!');
     }
 
     public function update(Request $request, $id)
     {
         $retirada = Retirada::findOrFail($id);
-
         $validated = $request->validate([
             'status' => 'required|in:pendente,autorizado,negado,retirado,entregue,cancelado,cancelar entrega,pendente entrega',
             'retirada_autorizada_por' => 'nullable|string|max:100',
@@ -156,6 +171,7 @@ public function list(Request $request, ?string $categoria = null)
         $this->authorizeOwnerOrAdmin($retirada);
 
         $retirada->update(['status' => 'pendente entrega']);
+        $retirada->cartao->save(); // ← ESSENCIAL!
 
         return back()->with('success', 'Entrega solicitada com sucesso!');
     }
@@ -192,40 +208,43 @@ public function list(Request $request, ?string $categoria = null)
             'entrega_autorizada_por' => $this->userSignature(),
             'datahora_entrega' => now(),
         ]);
-
+        $retirada->cartao->status = 'inativo';
+        $retirada->cartao->save(); // ← ESSENCIAL!
         return back()->with('success', 'Entrega concluída com sucesso!');
     }
 
     public function autorizar(Request $request, $id)
     {
         abort_unless($this->isAdmin(), 403, 'Acesso restrito ao administrador.');
-
         $validated = $request->validate([
             'status' => 'required|in:retirado,entregue,negado',
         ], [
             'status.required' => 'O status é obrigatório.',
             'status.in' => 'Status inválido.',
         ]);
-
         $retirada = Retirada::findOrFail($id);
-
         if (!in_array($retirada->status, ['pendente', 'cancelar entrega'], true)) {
-            return back()->with('error', 'Esse pedido já foi processado.');
+            return back()->with('error', 'Esse pedido já foi processado ou retirado.');
         }
 
         $retirada->status = $validated['status'];
-
         if ($validated['status'] === 'negado') {
             $retirada->retirada_autorizada_por = null;
             $retirada->entrega_autorizada_por = null;
             $retirada->datahora_retirada = null;
             $retirada->datahora_entrega = null;
+            $retirada->cartao->status = 'inativo';
+            $retirada->cartao->save(); // ← ESSENCIAL!
         } elseif ($validated['status'] === 'entregue') {
             $retirada->entrega_autorizada_por = $this->userSignature();
             $retirada->datahora_entrega = now();
+            $retirada->cartao->status = 'inativo';
+            $retirada->cartao->save(); // ← ESSENCIAL!
         } else {
             $retirada->retirada_autorizada_por = $this->userSignature();
             $retirada->datahora_retirada = now();
+            $retirada->cartao->status = 'em_uso';
+            $retirada->cartao->save();
         }
 
         $retirada->save();
@@ -233,6 +252,19 @@ public function list(Request $request, ?string $categoria = null)
         return back()->with('success', 'Pedido atualizado com sucesso!');
     }
 
+    public function deletarProcesso(Request $request, $id)
+    {
+        $retirada = Retirada::findOrFail($id);
+
+        // Atualiza o status do cartão
+        $retirada->cartao->status = 'inativo';
+        $retirada->cartao->save(); // ← ESSENCIAL!
+
+        // Deleta a retirada
+        $retirada->delete();
+
+        return back()->with('success', 'Pedido excluído com sucesso!');
+    }
     public function entregaIndex(Request $request)
     {
         $cartoes = Cartao::orderBy('nome_veiculo')->get();
@@ -271,6 +303,38 @@ public function list(Request $request, ?string $categoria = null)
         );
     }
 
+    public function retiradaAutomaticaCartao(Request $request, $id)
+    {
+        $cartao = Cartao::findOrFail($id);
+        if ($cartao->status == 'em_uso') {
+            return $this->list($request, $categoria = 'cartao');
+        } else {
+            $retirada = new Retirada();
+            $retirada->categoria = 'cartao';
+            $retirada->cartao_id = $cartao->id;
+            $retirada->user_id = Auth::id();
+            $retirada->status = 'pendente';
+            $aumento = $cartao->horimetro + $cartao->aumento_horimetro;
+            $cartao->horimetro = $aumento;
+            $retirada->nome_generico = 'Sem nome genérico';
+            $retirada->save();
+            $cartao->update();
+        }
+    }
+
+    public function entregaAutomaticaCartao(Request $request, $id)
+    {
+        $cartao = Cartao::findOrFail($id);
+        $retirada = $cartao->retiradas->where('status', 'retirado')->first();
+        if ($cartao->status == 'em_uso' and $retirada->status = 'retirado') {
+            $cartao->status = 'inativo';
+            $retirada->status = 'pendente entrega';
+            $retirada->update();
+            $cartao->update();
+        } else {
+            return $this->list($request, $categoria = 'cartao');
+        }
+    }
     private function userSignature(): string
     {
         $user = Auth::user();
