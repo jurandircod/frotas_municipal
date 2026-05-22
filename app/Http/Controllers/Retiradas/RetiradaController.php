@@ -73,7 +73,11 @@ class RetiradaController extends Controller
             return back()->with('error', 'Esse pedido já foi autorizado e não pode ser cancelado.');
         }
 
+        if ($retirada->status == 'cancelar entrega') {
+            $retirada->cartao->horimetro = $retirada->cartao->horimetro - $retirada->cartao->horimetro_aumento;
+        }
         $retirada->update(['status' => 'cancelado']);
+
 
         return back()->with('success', 'Pedido cancelado com sucesso!');
     }
@@ -116,7 +120,7 @@ class RetiradaController extends Controller
             }
         }
 
-        $retirada = Retirada::create([
+        Retirada::create([
             'user_id' => Auth::id(),
             'categoria' => $validated['categoria'],
             'cartao_id' => $validated['categoria'] === 'cartao' ? $validated['cartao_id'] : null,
@@ -130,12 +134,6 @@ class RetiradaController extends Controller
             'datahora_retirada' => null,
             'datahora_entrega' => null,
         ]);
-
-        if ($retirada->categoria == "cartao") {
-            $aumento = $retirada->cartao->horimetro + $retirada->cartao->aumento_horimetro;
-            $retirada->cartao->horimetro = $aumento;
-            $retirada->update();
-        }
         return redirect()->route('retirada.list')->with('success', 'Solicitação enviada com sucesso!');
     }
 
@@ -161,7 +159,6 @@ class RetiradaController extends Controller
     public function destroy($id)
     {
         Retirada::findOrFail($id)->delete();
-
         return redirect()->route('retirada.list')->with('success', 'Retirada excluída com sucesso!');
     }
 
@@ -244,6 +241,7 @@ class RetiradaController extends Controller
             $retirada->retirada_autorizada_por = $this->userSignature();
             $retirada->datahora_retirada = now();
             $retirada->cartao->status = 'em_uso';
+            $retirada->cartao->horimetro = $retirada->cartao->horimetro + $retirada->cartao->horimetro_aumento;
             $retirada->cartao->save();
         }
 
@@ -303,30 +301,25 @@ class RetiradaController extends Controller
         );
     }
 
-public function retiradaAutomaticaCartao(Request $request, $id)
+    public function retiradaAutomaticaCartao(Request $request, $id)
     {
         $cartao = Cartao::findOrFail($id);
 
         if ($cartao->status == 'em_uso') {
-
             return view('cartao.resultado', [
                 'status' => 'error',
                 'mensagem' => 'Este cartão já está em uso e não pode ser retirado novamente.',
                 'cartao' => $cartao,
             ]);
         } else {
-
             $retirada = new Retirada();
             $retirada->categoria = 'cartao';
             $retirada->cartao_id = $cartao->id;
             $retirada->user_id = Auth::id();
             $retirada->status = 'pendente';
             $retirada->nome_generico = 'Sem nome genérico';
-            $aumento = $cartao->horimetro + $cartao->aumento_horimetro;
-            $cartao->horimetro = $aumento;
             $retirada->save();
             $cartao->save();
-
             return view('cartao.resultado', [
                 'status' => 'success',
                 'mensagem' => 'Retirada automática realizada com sucesso.',
@@ -342,9 +335,11 @@ public function retiradaAutomaticaCartao(Request $request, $id)
         $retirada = $cartao->retiradas->where('status', 'retirado')->first();
 
         if (!$retirada) {
-            return redirect()
-                ->back()
-                ->with('error', 'Não foi encontrada nenhuma retirada com status "retirado" para este cartão.');
+            return view('cartao.resultado', [
+                'status' => 'error',
+                'mensagem' => 'Este cartão já está em uso e não pode ser retirado novamente.',
+                'cartao' => $cartao,
+            ]);
         }
 
         if ($cartao->status == 'em_uso' && $retirada->status == 'retirado') {

@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'QR Code Retirada')
+@section('title', 'QR Code Entrega')
 
 @section('content')
 <div class="max-w-xl mx-auto bg-white rounded-2xl shadow p-6">
 
     <div class="text-center">
         <h1 class="text-2xl font-bold text-gray-800">
-            QR Code de Retirada
+            QR Code de Entrega
         </h1>
 
         <p class="text-gray-500 mt-2">
