@@ -22,6 +22,11 @@ class Cartao extends Model
         'status'
     ];
 
+
+    public function retiradas()
+    {
+        return $this->hasMany(Retirada::class);
+    }
     protected static function booted()
     {
         static::created(function ($cartao) {

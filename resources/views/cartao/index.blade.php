@@ -101,8 +101,9 @@
                                 </td>
                                 <td class="px-3 py-3">
                                     @if ($c->qr_retirada_url)
-                                        <a href="{{ $c->qr_retirada_url }}" target="_blank">
-                                            <img src="{{ $c->qr_retirada_url }}" alt="QR Retirada" class="w-20 h-20">
+                                        <a href="{{ route('cartao.qr.retirada.show', $c->id) }}" target="_blank">
+                                            <img src="{{ $c->qr_retirada_url }}" alt="QR Retirada"
+                                                class="w-20 h-20 border rounded-lg p-1 bg-white hover:scale-105 transition">
                                         </a>
                                     @else
                                         <span class="text-gray-400">Sem QR</span>
@@ -111,8 +112,9 @@
 
                                 <td class="px-3 py-3">
                                     @if ($c->qr_entrega_url)
-                                        <a href="{{ $c->qr_entrega_url }}" target="_blank">
-                                            <img src="{{ $c->qr_entrega_url }}" alt="QR Entrega" class="w-20 h-20">
+                                        <a href="{{ route('cartao.qr.entrega.show', $c->id) }}" target="_blank">
+                                            <img src="{{ $c->qr_entrega_url }}" alt="QR Entrega"
+                                                class="w-20 h-20 border rounded-lg p-1 bg-white hover:scale-105 transition">
                                         </a>
                                     @else
                                         <span class="text-gray-400">Sem QR</span>
@@ -121,21 +123,47 @@
 
                                 <td class="px-3 py-3">
                                     <div class="flex flex-col gap-2">
-                                        <form action="{{ route('cartao.qrcode.retirada.gerar', $c->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                class="px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-sm border">
-                                                Gerar QR Retirada
-                                            </button>
-                                        </form>
 
-                                        <form action="{{ route('cartao.qrcode.entrega.gerar', $c->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                class="px-3 py-1 rounded-md bg-green-50 text-green-700 text-sm border">
-                                                Gerar QR Entrega
-                                            </button>
-                                        </form>
+                                        @if (!$c->cartao_qr_retirada)
+                                            <form action="{{ route('cartao.qrcode.retirada.gerar', $c->id) }}"
+                                                method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-sm border hover:bg-blue-100 transition">
+                                                    Gerar QR Retirada
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('cartao.qrcode.retirada.gerar', $c->id) }}"
+                                                method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm border hover:bg-indigo-100 transition">
+                                                    Regerar QR Retirada
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if (!$c->cartao_qr_entrega)
+                                            <form action="{{ route('cartao.qrcode.entrega.gerar', $c->id) }}"
+                                                method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="px-3 py-1 rounded-md bg-green-50 text-green-700 text-sm border hover:bg-green-100 transition">
+                                                    Gerar QR Entrega
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('cartao.qrcode.entrega.gerar', $c->id) }}"
+                                                method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 text-sm border hover:bg-emerald-100 transition">
+                                                    Regerar QR Entrega
+                                                </button>
+                                            </form>
+                                        @endif
+
                                     </div>
                                 </td>
                             </tr>

@@ -49,6 +49,15 @@ class CartaoController extends Controller
         return back()->with('success', 'QR Code gerado com sucesso!');
     }
 
+    public function showQrRetirada(Cartao $cartao)
+    {
+        return view('cartao.qr-retirada', compact('cartao'));
+    }
+
+    public function showQrEntrega(Cartao $cartao)
+    {
+        return view('cartao.qr-entrega', compact('cartao'));
+    }
     public function gerarQrCodeRetirada(Cartao $cartao)
     {
         $cartao->gerarQrCodeRetirada();
@@ -108,6 +117,7 @@ class CartaoController extends Controller
             'horimetro',
             'aumento_horimetro',
         ]));
+        
         return redirect()->route('cartao.index')->with('success', 'Cartão cadastrado com sucesso!');
     }
     public function update(Request $request, $id)

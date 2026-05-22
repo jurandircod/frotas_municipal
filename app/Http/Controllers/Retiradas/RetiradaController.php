@@ -31,7 +31,7 @@ class RetiradaController extends Controller
         // centraliza timezone (mantém o comportamento do original)
         date_default_timezone_set('America/Sao_Paulo');
     }
-    
+
     public function index(Request $request, ?string $categoria = null)
     {
         return $this->list($request, $categoria);
@@ -303,37 +303,67 @@ class RetiradaController extends Controller
         );
     }
 
-    public function retiradaAutomaticaCartao(Request $request, $id)
+public function retiradaAutomaticaCartao(Request $request, $id)
     {
         $cartao = Cartao::findOrFail($id);
+
         if ($cartao->status == 'em_uso') {
-            return $this->list($request, $categoria = 'cartao');
+
+            return view('cartao.resultado', [
+                'status' => 'error',
+                'mensagem' => 'Este cartão já está em uso e não pode ser retirado novamente.',
+                'cartao' => $cartao,
+            ]);
         } else {
+
             $retirada = new Retirada();
             $retirada->categoria = 'cartao';
             $retirada->cartao_id = $cartao->id;
             $retirada->user_id = Auth::id();
             $retirada->status = 'pendente';
+            $retirada->nome_generico = 'Sem nome genérico';
             $aumento = $cartao->horimetro + $cartao->aumento_horimetro;
             $cartao->horimetro = $aumento;
-            $retirada->nome_generico = 'Sem nome genérico';
             $retirada->save();
-            $cartao->update();
+            $cartao->save();
+
+            return view('cartao.resultado', [
+                'status' => 'success',
+                'mensagem' => 'Retirada automática realizada com sucesso.',
+                'cartao' => $cartao,
+                'retirada' => $retirada,
+            ]);
         }
     }
 
     public function entregaAutomaticaCartao(Request $request, $id)
     {
-        $cartao = Cartao::findOrFail($id);
+        $cartao = Cartao::with('retiradas')->findOrFail($id);
         $retirada = $cartao->retiradas->where('status', 'retirado')->first();
-        if ($cartao->status == 'em_uso' and $retirada->status = 'retirado') {
+
+        if (!$retirada) {
+            return redirect()
+                ->back()
+                ->with('error', 'Não foi encontrada nenhuma retirada com status "retirado" para este cartão.');
+        }
+
+        if ($cartao->status == 'em_uso' && $retirada->status == 'retirado') {
             $cartao->status = 'inativo';
             $retirada->status = 'pendente entrega';
-            $retirada->update();
-            $cartao->update();
-        } else {
-            return $this->list($request, $categoria = 'cartao');
+
+            $retirada->save();
+            $cartao->save();
+
+            return view('cartao.resultado', [
+                'status' => 'success',
+                'mensagem' => 'Entrega automática realizada com sucesso.',
+                'cartao' => $cartao,
+            ]);
         }
+
+        return redirect()
+            ->back()
+            ->with('error', 'A operação não pôde ser concluída. Verifique o status do cartão e da retirada.');
     }
     private function userSignature(): string
     {

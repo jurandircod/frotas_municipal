@@ -113,7 +113,13 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/cartoes/{cartao}/qrcode/entrega', [CartaoController::class, 'gerarQrCodeEntrega'])
             ->name('cartao.qrcode.entrega.gerar');
-            
+
+        Route::get('/cartoes/{cartao}/qr/retirada', [CartaoController::class, 'showQrRetirada'])
+            ->name('cartao.qr.retirada.show');
+
+        Route::get('/cartoes/{cartao}/qr/entrega', [CartaoController::class, 'showQrEntrega'])
+            ->name('cartao.qr.entrega.show');
+
         Route::prefix('retirada')->name('retirada.')->controller(RetiradaController::class)->group(function () {
 
             Route::get('/cartao/{id}', [RetiradaController::class, 'retiradaAutomaticaCartao'])->name('cartao.retirada.automatico');
