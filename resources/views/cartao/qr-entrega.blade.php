@@ -21,12 +21,12 @@
 
     <div class="flex justify-center mt-6">
         <img
-            src="{{ asset('storage/' . $cartao->cartao_qr_retirada) }}"
+            src="{{ asset('storage/' . $cartao->cartao_qr_entrega) }}"
             class="w-72 h-72 border rounded-xl p-3 bg-white">
     </div>
 
     <div class="mt-6 text-center">
-        <a href="{{ asset('storage/' . $cartao->cartao_qr_retirada) }}"
+        <a href="{{ asset('storage/' . $cartao->cartao_qr_entrega) }}"
             download
             class="px-4 py-2 bg-blue-600 text-white rounded-lg">
             Baixar QR Code

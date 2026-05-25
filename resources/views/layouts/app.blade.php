@@ -271,9 +271,11 @@
                             <a href="{{ route('user.list') }}"
                                 class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
                             <a href="{{ route('secretaria.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Cadastrar Secretarias</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Cadastrar
+                                Secretarias</a>
                             <a href="{{ route('secretaria.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar Secretarias</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
+                                Secretarias</a>
                             <a href="#"
                                 class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Relatórios</a>
                             <a href="#"
@@ -290,7 +292,6 @@
                     <a href="#"
                         class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Documentação</a>
                 </div>
-
             </nav>
 
             <div class="p-4 border-t border-gray-100">
@@ -305,7 +306,7 @@
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
     <main class="safe-area">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="">
             <div class="pt-4 sm:pt-6 pb-4">
                 <div class="flex items-center justify-between gap-4">
                     <div>

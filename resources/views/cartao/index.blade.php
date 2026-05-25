@@ -143,7 +143,6 @@
                                                 </button>
                                             </form>
                                         @endif
-
                                         @if (!$c->cartao_qr_entrega)
                                             <form action="{{ route('cartao.qrcode.entrega.gerar', $c->id) }}"
                                                 method="POST">
