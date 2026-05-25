@@ -196,7 +196,7 @@ class MovimentacaoController extends Controller
             return redirect()->back()->with('error', $msg);
         }
         $movimentacao = Movimentacao::find($id);
-        if (! $movimentacao) {
+        if (!$movimentacao) {
             $msg = 'Movimentação não encontrada.';
             if ($request->wantsJson()) {
                 return response()->json(['message' => $msg], 404);

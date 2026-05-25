@@ -343,12 +343,9 @@ class RetiradaController extends Controller
         }
 
         if ($cartao->status == 'em_uso' && $retirada->status == 'retirado') {
-            $cartao->status = 'inativo';
             $retirada->status = 'pendente entrega';
-
             $retirada->save();
             $cartao->save();
-
             return view('cartao.resultado', [
                 'status' => 'success',
                 'mensagem' => 'Entrega automática realizada com sucesso.',
