@@ -304,6 +304,34 @@
 
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
+    <main class="safe-area">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="pt-4 sm:pt-6 pb-4">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">@yield('title', '')</h2>
+                        <p class="text-sm text-gray-500">@yield('subtitle', '')</p>
+                    </div>
+                    <div class="hidden md:block">@yield('page_actions')</div>
+                </div>
+            </div>
+
+            <section class="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+                @yield('content')
+            </section>
+
+            <div class="md:hidden mt-6">
+                <div class="flex gap-3">@yield('mobile_quick_actions')</div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-8 py-6 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div>Prefeitura Municipal — Sistema de Gestão de Frota</div>
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script>
         (function() {
