@@ -388,7 +388,6 @@
                         @endif
                     </div>
                 </div>
-
             </form>
         </div>
     </div>
@@ -421,7 +420,6 @@
                     🏁 Concluir Corrida
                 </button>
             @endif
-
         </div>
     </div>
 
