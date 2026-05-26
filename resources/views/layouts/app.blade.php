@@ -153,70 +153,68 @@
             {{-- Navigation grouped --}}
             <nav class="px-2 py-4 overflow-y-auto space-y-2 flex-1" aria-label="Sidebar">
 
-                @php
-                    // pega o usuário autenticado (garanta que auth está disponível)
-                    $user = auth()->user();
-                @endphp
+                @php $user = auth()->user(); @endphp
 
-                {{-- Fleet group --}}
+                {{-- Dashboard --}}
                 <div class="px-1">
-                    <button type="button"
-                        class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
-                        data-toggle-group="fleet" aria-expanded="true">
-                        <div class="flex items-center gap-3">
-                            <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7h18M5 7v13a1 1 0 001 1h2a1 1 0 001-1V7M15 7v13a1 1 0 001 1h2a1 1 0 001-1V7">
-                                </path>
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700">Frota</span>
-                        </div>
-                        <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                            aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                                clip-rule="evenodd" />
+                    <a href="{{ route('dashboard') }}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-md text-sm {{ request()->routeIs('dashboard*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                        <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
                         </svg>
-                    </button>
-
-                    <div class="mt-1 space-y-1 pl-8" data-group="fleet">
-                        {{-- Veículos e Tipos SÓ para admin --}}
-                        @if ($user && $user->role_id == 2)
-                            <a href="{{ route('veiculo.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('veiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Veículos</a>
-                            <a href="{{ route('veiculo.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
-                                veículos</a>
-                            <a href="{{ route('tipoVeiculo.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Tipos
-                                de veículo</a>
-                            <a href="{{ route('tipoVeiculo.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Listar
-                                Tipos de Veículo</a>
-                        @else
-                            {{-- Usuário comum não vê itens de frota --}}
-                            <div class="text-xs text-gray-400 italic px-3 py-2">Acesso a frota restrito ao
-                                administrador</div>
-                        @endif
-                    </div>
+                        Dashboard
+                    </a>
                 </div>
 
-                {{-- Operations group --}}
+                {{-- Frota (admin only) --}}
+                @if ($user && $user->role_id == 2)
+                    <div class="px-1">
+                        <button type="button"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
+                            data-toggle-group="fleet" aria-expanded="true">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 17l4-4 4 4M12 13V3M3 17h18" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Frota</span>
+                            </div>
+                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div class="mt-1 space-y-1 pl-8" data-group="fleet">
+                            <a href="{{ route('veiculo.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('veiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Veículos
+                            </a>
+                            <a href="{{ route('tipoVeiculo.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('tipoVeiculo.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Tipos de Veículo
+                            </a>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Operações --}}
                 <div class="px-1">
                     <button type="button"
                         class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
                         data-toggle-group="operations" aria-expanded="true">
                         <div class="flex items-center gap-3">
                             <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24" aria-hidden="true">
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7H3v12a2 2 0 002 2z" />
                             </svg>
                             <span class="text-sm font-medium text-gray-700">Operações</span>
                         </div>
-                        <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                            aria-hidden="true">
+                        <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
                                 clip-rule="evenodd" />
@@ -224,43 +222,146 @@
                     </button>
 
                     <div class="mt-1 space-y-1 pl-8" data-group="operations">
-                        {{-- Movimentações: ADMIN vê listagens; COMUM vê apenas o link para abrir/criar movimentação --}}
                         @if ($user && $user->role_id == 2)
                             <a href="{{ route('movimentacao.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('movimentacao.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Movimentações</a>
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('movimentacao.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Movimentações
+                            </a>
                             <a href="{{ route('movimentacao.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
-                                Movimentações</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                                Listar Movimentações
+                            </a>
                         @else
-                            {{-- Usuário comum: link direto para página onde ele cria movimentação.
-                                 Ajuste a URL abaixo para onde seu formulário de criação realmente está. --}}
-                            <a href="{{ url('/movimentacao') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Nova
-                                Movimentação</a>
+                            <a href="{{ route('movimentacao.withVeiculo', ['veiculoId' => 0]) }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                                Nova Movimentação
+                            </a>
                         @endif
 
-                        {{-- Motorista / perfil: ambos podem ver --}}
                         <a href="{{ route('user.index') }}"
-                            class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('user.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">Motorista</a>
+                            class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('user.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                            Meu Perfil
+                        </a>
                     </div>
                 </div>
 
-                {{-- Admin group: completamente escondido para não-admin --}}
+                {{-- Retiradas (admin only) --}}
                 @if ($user && $user->role_id == 2)
+                    <div class="px-1">
+                        <button type="button"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
+                            data-toggle-group="retiradas" aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 7h18M3 12h18M3 17h18" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Retiradas</span>
+                            </div>
+                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div class="mt-1 space-y-1 pl-8" data-group="retiradas">
+                            <a href="{{ route('retirada.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('retirada.index') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Todas as Retiradas
+                            </a>
+                            <a href="{{ route('retirada.autorizacao.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('retirada.autorizacao*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Autorizações
+                            </a>
+                            <a href="{{ route('retirada.entrega.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('retirada.entrega*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Entregas
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Cartões (admin only) --}}
+                    <div class="px-1">
+                        <button type="button"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
+                            data-toggle-group="cartoes" aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h18M7 15h1m4 0h1M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Cartões</span>
+                            </div>
+                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div class="mt-1 space-y-1 pl-8" data-group="cartoes">
+                            <a href="{{ route('cartao.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('cartao.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Cadastrar Cartão
+                            </a>
+                            <a href="{{ route('cartao.list') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                                Listar Cartões
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Ferramentas (admin only) --}}
+                    <div class="px-1">
+                        <button type="button"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
+                            data-toggle-group="ferramentas" aria-expanded="false">
+                            <div class="flex items-center gap-3">
+                                <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700">Ferramentas</span>
+                            </div>
+                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div class="mt-1 space-y-1 pl-8" data-group="ferramentas">
+                            <a href="{{ route('ferramenta.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('ferramenta.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Cadastrar Ferramenta
+                            </a>
+                            <a href="{{ route('ferramenta.list') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                                Listar Ferramentas
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Admin --}}
                     <div class="px-1">
                         <button type="button"
                             class="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-50 focus:outline-none"
                             data-toggle-group="admin" aria-expanded="false">
                             <div class="flex items-center gap-3">
                                 <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24" aria-hidden="true">
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3zM6.5 20h11a2 2 0 002-2v-2a4 4 0 00-4-4h-7a4 4 0 00-4 4v2a2 2 0 002 2z" />
                                 </svg>
                                 <span class="text-sm font-medium text-gray-700">Admin</span>
                             </div>
-                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
+                            <svg class="h-4 w-4 chev text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd"
                                     d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
                                     clip-rule="evenodd" />
@@ -269,17 +370,25 @@
 
                         <div class="mt-1 space-y-1 pl-8" data-group="admin">
                             <a href="{{ route('user.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('user.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Usuários
+                            </a>
                             <a href="{{ route('secretaria.index') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Cadastrar
-                                Secretarias</a>
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('secretaria.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Secretarias
+                            </a>
                             <a href="{{ route('secretaria.list') }}"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Listar
-                                Secretarias</a>
-                            <a href="#"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Relatórios</a>
-                            <a href="#"
-                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Configurações</a>
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                                Listar Secretarias
+                            </a>
+                            <a href="{{ route('movimentacao.pdf') }}"
+                                class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                                Relatório PDF
+                            </a>
+                            <a href="{{ route('logs.index') }}"
+                                class="block px-3 py-2 rounded-md text-sm {{ request()->routeIs('logs.*') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }}">
+                                Logs do Sistema
+                            </a>
                         </div>
                     </div>
                 @endif
@@ -292,6 +401,7 @@
                     <a href="#"
                         class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50">Documentação</a>
                 </div>
+
             </nav>
 
             <div class="p-4 border-t border-gray-100">
@@ -305,8 +415,8 @@
 
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
-    <main class="safe-area">
-        <div class="">
+    <main class="safe-area px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
             <div class="pt-4 sm:pt-6 pb-4">
                 <div class="flex items-center justify-between gap-4">
                     <div>
